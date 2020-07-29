@@ -1,3 +1,8 @@
 export interface ProductEntry {
-  name: number;
+  name: string;
+}
+
+export interface StoreEntry {
+  name: string;
+  city: string;
 }

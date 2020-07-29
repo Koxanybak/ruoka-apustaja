@@ -1,13 +1,13 @@
 import puppeteer from "puppeteer"
-import { Client } from "pg"
+/* import { Client } from "pg"
 import format from "pg-format"
+import logger from "./logger" */
 import dotenv from "dotenv"
-import logger from "./logger"
 dotenv.config()
 
 // scrolls down until no more stores are loaded
 const scrollStoreList = async (container: puppeteer.ElementHandle<Element> | null) => {
-  await container?.evaluate(node => {
+  /* await container?.evaluate(node => {
     return new Promise((resolve, reject) => {
       try {
         const distance = 500
@@ -29,6 +29,67 @@ const scrollStoreList = async (container: puppeteer.ElementHandle<Element> | nul
     })
   }).catch(e => {
     console.error(e)
+  }) */
+  await container?.evaluate(node => {
+    return new Promise((resolve, reject) => {
+      let tOut: ReturnType<typeof setTimeout> | undefined = undefined
+      let timer: ReturnType<typeof setInterval> | undefined = undefined
+      try {
+        const distance = 500
+        const delay = 100
+        const scrollTimeSec = 15
+        let totalHeight = 0
+
+        console.log(node.className)
+        console.log("scrollHeight:", node.scrollHeight)
+        console.log("scrollHeight:", node.scrollHeight)
+        console.log("clientHeight:", node.clientHeight)
+        console.log("ISSCROLLABLE:", node.scrollHeight > node.clientHeight)
+
+        timer = setInterval(() => {
+          const scrollHeight = node.scrollHeight
+          node.scrollBy(0, distance)
+          totalHeight += distance
+
+          console.log("totalHeight:", totalHeight)
+          console.log("scrollHeight:", scrollHeight)
+          console.log("clientHeight:", node.clientHeight)
+
+          console.log("innerHTML:", node.className)
+
+          if (totalHeight >= scrollHeight) {
+            console.log("WAS BIGGER")
+            totalHeight = scrollHeight
+            if (!tOut) {
+              console.log("TIMEOUT SET")
+              tOut = setTimeout(() => {
+                if (timer) {
+                  clearInterval(timer)
+                }
+                resolve()
+              }, scrollTimeSec*1000)
+            }
+          } else {
+            console.log("TIMEOUT CLEARED")
+            if (tOut) {
+              clearTimeout(tOut)
+            }
+          }
+        }, delay)
+      } catch (err) {
+        if (timer) {
+          clearInterval(timer)
+        }
+        if (tOut) {
+          clearTimeout(tOut)
+        }
+        reject(err)
+      }
+    }).catch(err => {
+      console.error(err)
+    })
+  }).catch(e => {
+    console.error(e)
   })
 }
 
@@ -42,18 +103,8 @@ void (async () => {
     height: 1080,
   })
   await page.goto("https://www.k-ruoka.fi/kauppa")
-  function describe(jsHandle: puppeteer.JSHandle) {
-    return jsHandle.executionContext().evaluate(_obj => {
-      // serialize |obj| however you want
-      return ""
-    }, jsHandle)
-  }
-  
-  page.on("console", msg => {
-    void Promise.all(msg.args().map(arg => describe(arg))).then(args => {
-      console.log(msg.text(), ...args)
-    })
-  })
+
+  page.on("console", consoleObj => console.log(consoleObj.text()))
 
   // gets all stores
   const storeSwitchbutton = await page.$(".store-and-chain-selector__switch-icon")
@@ -67,9 +118,7 @@ void (async () => {
   await scrollStoreList(storeContainerNode)
   console.log("Scrolling done")
 
-  // KATSO, ETTÄ NIMET OVAT UNIIKKEJA
-
-  const storeNodes = await storeContainerNode?.$$("a")
+  /* const storeNodes = await storeContainerNode?.$$("a")
   const stores = storeNodes ? await Promise.all(storeNodes.map(async node => {
     const infoNode = await node.$(".store-list-item__name-and-hours")
     const name = await (await infoNode?.$(":first-child"))?.evaluate(node => node.innerHTML)
@@ -90,7 +139,7 @@ void (async () => {
     }
   })
   
-  console.log(stores.length)
+  console.log(stores.length) */
 
 
   await browser.close()

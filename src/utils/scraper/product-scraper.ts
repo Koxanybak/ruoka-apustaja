@@ -1,10 +1,11 @@
 import puppeteer from "puppeteer"
+import { ProductScrapeError } from "../errors"
 
 // scrolls down until no more products are loaded
 const scrollProductList = async (container: puppeteer.ElementHandle<Element> | null) => {
-  /* if (!container) {
-    throw new Error("Container missing, cannot scroll")
-  } */
+  if (!container) {
+    throw new ProductScrapeError("Unable to get products")
+  }
 
   await container?.evaluate(node => {
     return new Promise((resolve, reject) => {
@@ -73,7 +74,7 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
       throw new Error(err.message)
     })
   }).catch((err: Error) => {
-    throw new Error(err.message)
+    throw new ProductScrapeError(err.message)
   })
 }
 
@@ -142,9 +143,9 @@ void (async () => {
   // goes through all the categories and gets their products
   const productNames: (string | undefined)[] = []
   const failedCategories: (string | undefined)[] = []
-  const errors: Error[] = []
+  const errors: string[] = []
 
-  for (let i = categoryNodes.length - 1; i > 1; i--) {
+  for (let i = categoryNodes.length - 1; i > 0; i--) {
     // clicks a category and scrolls down the product list
     categoryNodes = await page.$$(".ProductCategoriesDesktop__categories__category")
     await categoryNodes[i].click()
@@ -152,10 +153,11 @@ void (async () => {
     await showAllButton?.click()
     const productContainer = await page.$(".product-search-result-list.shopping-list-side-panel-tab-content")
     await page.waitFor(1.5*1000)
+
     await scrollProductList(productContainer).catch(async (err: Error) => {
       console.error(err.message)
-      errors.push(err)
-      if (err.message === "Unable to get products") {
+      errors.push(err.message)
+      if (err instanceof ProductScrapeError) {
         const catName = await getCategoryName(page)
         failedCategories.push(catName)
       }
@@ -171,6 +173,12 @@ void (async () => {
     await page.goBack()
   }
 
+  const uniqueMap = new Map<string, string>()
+  productNames.forEach(name => {
+    uniqueMap.get(name)
+  })
+
+  // logs info
   productNames.forEach(p => console.log(p))
   console.log({store})
   console.log({failedCategories})

@@ -8,7 +8,7 @@
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint --ext .ts",
     "start": "node ./build/index.js",
-    "start-ts": "rm -rf screenshots/screenshot1.png && rm -rf screenshots/screenshot2.png && ts-node src/index.ts",
+    "start-ts": "rm -rf screenshots/screenshot1.png && rm -rf screenshots/screenshot2.png && ts-node src/utils/scraper/product-scraper.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "https://github.com/Koxanybak/ruoka-apustaja",
