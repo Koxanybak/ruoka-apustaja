@@ -1,35 +1,12 @@
 import puppeteer from "puppeteer"
-/* import { Client } from "pg"
+import { Client } from "pg"
 import format from "pg-format"
-import logger from "./logger" */
+import logger from "../logger"
 import dotenv from "dotenv"
 dotenv.config()
 
 // scrolls down until no more stores are loaded
 const scrollStoreList = async (container: puppeteer.ElementHandle<Element> | null) => {
-  /* await container?.evaluate(node => {
-    return new Promise((resolve, reject) => {
-      try {
-        const distance = 500
-        const delay = 100
-        const scrollTimeSec = 40
-
-        console.log("Scrolling...")
-        setInterval(() => {
-          node.scrollBy(0, distance)
-        }, delay)
-        setTimeout(() => {
-          resolve()
-        }, scrollTimeSec*1000)
-      } catch (err) {
-        reject(err)
-      }
-    }).catch(err => {
-      console.error(err)
-    })
-  }).catch(e => {
-    console.error(e)
-  }) */
   await container?.evaluate(node => {
     return new Promise((resolve, reject) => {
       let tOut: ReturnType<typeof setTimeout> | undefined = undefined
@@ -118,7 +95,7 @@ void (async () => {
   await scrollStoreList(storeContainerNode)
   console.log("Scrolling done")
 
-  /* const storeNodes = await storeContainerNode?.$$("a")
+  const storeNodes = await storeContainerNode?.$$("a")
   const stores = storeNodes ? await Promise.all(storeNodes.map(async node => {
     const infoNode = await node.$(".store-list-item__name-and-hours")
     const name = await (await infoNode?.$(":first-child"))?.evaluate(node => node.innerHTML)
@@ -132,14 +109,16 @@ void (async () => {
 
   const qText = format("INSERT INTO stores (name, city) VALUES %L ON CONFLICT (name, city) DO UPDATE SET name = EXCLUDED.name, city = EXCLUDED.city RETURNING *", stores)
   client.query(qText, (err, res) => {
-    if (err) logger.error(err)
-    else {
+    if (err) {
+      logger.error(err)
+      throw err
+    } else {
       res.rows.forEach(r => logger.info(r))
       void client.end()
     }
   })
   
-  console.log(stores.length) */
+  console.log(stores.length)
 
 
   await browser.close()

@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer"
 import { ProductScrapeError } from "../errors"
+import { ProductEntry } from "../../types"
 
 // scrolls down until no more products are loaded
 const scrollProductList = async (container: puppeteer.ElementHandle<Element> | null) => {
@@ -17,11 +18,11 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
         const scrollTimeSec = 6
         let totalHeight = 0
 
-        console.log(node.className)
+        /* console.log(node.className)
         console.log("scrollHeight:", node.scrollHeight)
         console.log("scrollHeight:", node.scrollHeight)
         console.log("clientHeight:", node.clientHeight)
-        console.log("ISSCROLLABLE:", node.scrollHeight > node.clientHeight)
+        console.log("ISSCROLLABLE:", node.scrollHeight > node.clientHeight) */
 
         if (node.scrollHeight < node.clientHeight || (node.scrollHeight === 0 || node.clientHeight === 0)) {
           throw new Error("Unable to get products")
@@ -32,20 +33,19 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
           node.scrollBy(0, distance)
           totalHeight += distance
 
-          console.log("totalHeight:", totalHeight)
+          /* console.log("totalHeight:", totalHeight)
           console.log("scrollHeight:", scrollHeight)
-          console.log("clientHeight:", node.clientHeight)
-          /* console.log(node) */
+          console.log("clientHeight:", node.clientHeight) */
 
           if (node.scrollHeight === 0 || node.clientHeight === 0) {
             throw new Error("Unable to get products")
           }
 
           if (totalHeight >= scrollHeight) {
-            console.log("WAS BIGGER")
+            /* console.log("WAS BIGGER") */
             totalHeight = scrollHeight
             if (!tOut) {
-              console.log("TIMEOUT SET")
+              /* console.log("TIMEOUT SET") */
               tOut = setTimeout(() => {
                 if (timer) {
                   clearInterval(timer)
@@ -54,7 +54,7 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
               }, scrollTimeSec*1000)
             }
           } else {
-            console.log("TIMEOUT CLEARED")
+            /* console.log("TIMEOUT CLEARED") */
             if (tOut) {
               clearTimeout(tOut)
               tOut = undefined
@@ -79,10 +79,29 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
 }
 
 // gets the name of the product node
-const getProductName = async (productNode: puppeteer.ElementHandle<Element>): Promise<string | undefined> => {
-  const nameNode = await productNode.$("div.product-result-name > div > div.text-ellipsis.text-ellipsis__2-lines.product-name > span")
-  return await nameNode?.evaluate(node => {
-    return node.innerHTML
+const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "store" | "id">> => {
+  return await productNode.evaluate(node => {
+    const name = node.querySelector("div.product-result-name > div > div.text-ellipsis.text-ellipsis__2-lines.product-name > span")?.innerHTML
+    const imgSrc = node.querySelector("div.product-result-image > div > img")?.getAttribute("src")
+
+    let intPart = node.querySelector("div.product-result-price > span.price > span.price-integer-part")?.innerHTML
+    intPart = intPart ? intPart : ""
+    let decPart = node.querySelector("div.product-result-price > span.price > span.price-fractional-part")?.innerHTML
+    decPart = decPart ? decPart : ""
+    const price = parseFloat(intPart + "." + decPart)
+
+    const pricePerUnitStr = document.querySelector("div.product-result-price > span.reference")?.childNodes[0].nodeValue
+    const decimalSep = pricePerUnitStr?.replace(",", ".")
+    const pricePerUnit = parseFloat(decimalSep ? decimalSep : "")
+    const unit = document.querySelector("div.product-result-price > span.reference > span:nth-child(2)")?.innerHTML
+
+    return {
+      name: name ? name : "",
+      price,
+      pricePerUnit: pricePerUnit ? pricePerUnit : null,
+      unit: unit ? unit : null,
+      imgSrc: imgSrc ? imgSrc : "/assets/ei-tuotekuvaa.svg",
+    }
   })
 }
 // gets the name of the category node
@@ -129,19 +148,20 @@ void (async () => {
 
   // gets the current store
   const storeNode = await page.$(".store-and-chain-selector")
-  const store = await (await storeNode?.getProperty("innerText"))?.jsonValue()
+  const store = await storeNode?.evaluate(node => node.childNodes[node.childNodes.length - 1].nodeValue)
+  const cleanStore = store ? store : ""
 
   // goes to the product page and gets the categories
   const productButton = await page.$(".product-search-category-button")
   await productButton?.click()
-  console.log("productButton exists:", !!productButton)
+  /* console.log("productButton exists:", !!productButton) */
   await page.waitForSelector(".ProductCategoriesDesktop__categories__category")
   let categoryNodes = await page.$$(".ProductCategoriesDesktop__categories__category")
 
-  console.log(categoryNodes.length)
+  /* console.log(categoryNodes.length) */
 
   // goes through all the categories and gets their products
-  const productNames: (string | undefined)[] = []
+  const products: Omit<ProductEntry, "id">[] = []
   const failedCategories: (string | undefined)[] = []
   const errors: string[] = []
 
@@ -154,6 +174,7 @@ void (async () => {
     const productContainer = await page.$(".product-search-result-list.shopping-list-side-panel-tab-content")
     await page.waitFor(1.5*1000)
 
+    // scrolling
     await scrollProductList(productContainer).catch(async (err: Error) => {
       console.error(err.message)
       errors.push(err.message)
@@ -166,20 +187,28 @@ void (async () => {
     // get the products
     const productNodes = await productContainer?.$$(".product-result-item")
     const cleanedNodes = productNodes ? productNodes : []
-    const names = await Promise.all(cleanedNodes.map(node => getProductName(node)))
-    productNames.push(...names)
+    const details = (await Promise.all(cleanedNodes.map(node => getProductDetails(node)))).map(p => ({ ...p, store: cleanStore }))
+    products.push(...details)
 
     // goes back to the category page
-    await page.goBack()
+    const productButton = await page.$(".product-search-category-button")
+    await productButton?.click()
+    await page.waitForSelector(".ProductCategoriesDesktop__categories__category")
   }
 
+  // makes sure the products are unique
+  const cleanedProducts = products.filter(p => p.name !== "" && !!p.price)
   const uniqueMap = new Map<string, string>()
-  productNames.forEach(name => {
-    uniqueMap.get(name)
+  const uniqueProducts: Omit<ProductEntry, "id">[] = []
+  const duplicateProducts: Omit<ProductEntry, "id">[] = []
+  cleanedProducts.forEach(p => {
+    if (!uniqueMap.get(p.name)) uniqueProducts.push(p)
+    else duplicateProducts.push(p)
   })
 
   // logs info
-  productNames.forEach(p => console.log(p))
+  uniqueProducts.forEach(p => console.log(p))
+  duplicateProducts.forEach(p => console.log(p))
   console.log({store})
   console.log({failedCategories})
   console.log({errors})
