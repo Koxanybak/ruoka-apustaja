@@ -1,9 +1,10 @@
 import express from "express"
-import http from "http"
+/* import http from "http" */
+import http = require("http")
 import storeRouter from "./routes/stores"
 import productRouter from "./routes/products"
 import { errorHandler, unknownEndpoint } from "./utils/middleware"
-require("express-async-errors")
+/* require("express-async-errors") */
 
 const PORT = 3000
 

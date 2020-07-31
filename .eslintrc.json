@@ -38,6 +38,7 @@
             "error", { "argsIgnorePattern": "^_" }
         ],
         /* "@typescript-eslint/no-explicit-any": 1, */
-        "no-case-declarations": 0
+        "no-case-declarations": 0,
+        "@typescript-eslint/no-explicit-any": "off"
     }
 }

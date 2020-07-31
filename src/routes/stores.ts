@@ -1,16 +1,17 @@
 import express from "express"
 import { getStores, getStoreById } from "../services/store-service"
+import expressAsyncHandler from "express-async-handler"
 
 const storeRouter = express.Router()
 
-storeRouter.get("/", async (req: express.Request, res: express.Response): Promise<void> => {
-  const name = req.params.name
-  const city = req.params.city
-  const stores = await getStores()
+storeRouter.get("/", expressAsyncHandler(async (req: express.Request, res: express.Response): Promise<void> => {
+  const name = req.query.name?.toString()
+  const city = req.query.city?.toString()
+  const stores = await getStores(name, city)
   res.status(200).json(stores)
-})
+}))
 
-storeRouter.get("/:id", async (req: express.Request, res: express.Response): Promise<void> => {
+storeRouter.get("/:id", expressAsyncHandler(async (req: express.Request, res: express.Response): Promise<void> => {
   const id = req.params.id
   const store = await getStoreById(id)
   if (store) {
@@ -18,6 +19,6 @@ storeRouter.get("/:id", async (req: express.Request, res: express.Response): Pro
   } else {
     res.status(404).end()
   }
-})
+}))
 
 export default storeRouter

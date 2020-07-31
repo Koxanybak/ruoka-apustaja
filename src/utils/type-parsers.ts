@@ -17,25 +17,25 @@ const isNumber = (object: any): object is number => {
 // type parsers
 const parseString = (object: any, atrName: string): string => {
   if (!object || !isString(object)) {
-    throw new Error(`Incorrect or missing ${atrName}`)
+    throw new TypeError(`Incorrect or missing ${atrName}`)
   }
   return object
 }
 const parseStringNull = (object: any, atrName: string): string | null => {
   if (!isNull(object) && !isString(object)) {
-    throw new Error(`Incorrect or missing ${atrName}`)
+    throw new TypeError(`Incorrect or missing ${atrName}`)
   }
   return object
 }
 const parseNumber = (object: any, atrName: string): number => {
   if (!object || !isNumber(object)) {
-    throw new Error(`Incorrect or missing ${atrName}`)
+    throw new TypeError(`Incorrect or missing ${atrName}`)
   }
   return object
 }
 const parseNumberNull = (object: any, atrName: string): number | null => {
   if (!isNull(object) && !isNumber(object)) {
-    throw new Error(`Incorrect or missing ${atrName}`)
+    throw new TypeError(`Incorrect or missing ${atrName}`)
   }
   return object
 }
