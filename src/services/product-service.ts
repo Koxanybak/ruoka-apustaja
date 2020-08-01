@@ -2,6 +2,8 @@ import { pool } from "../utils/config"
 import { ProductEntry } from "../types"
 import { parseProductEntry } from "../utils/type-parsers"
 
+// CHANGE FROM STORE TO PRODUCT
+
 // gets all the stores
 export const getProducts = async (name: string | undefined, city: string | undefined): Promise<ProductEntry[]> => {
   const queryText = "SELECT * FROM stores WHERE LOWER(name) LIKE LOWER($1) AND LOWER(city) LIKE LOWER($2)"

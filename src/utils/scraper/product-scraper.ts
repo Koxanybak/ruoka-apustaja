@@ -79,7 +79,7 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
 }
 
 // gets the name of the product node
-const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "store" | "id">> => {
+const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "storeID" | "id" | "link">> => {
   return await productNode.evaluate(node => {
     const name = node.querySelector("div.product-result-name > div > div.text-ellipsis.text-ellipsis__2-lines.product-name > span")?.innerHTML
     const imgSrc = node.querySelector("div.product-result-image > div > img")?.getAttribute("src")
@@ -149,7 +149,7 @@ void (async () => {
   // gets the current store
   const storeNode = await page.$(".store-and-chain-selector")
   const store = await storeNode?.evaluate(node => node.childNodes[node.childNodes.length - 1].nodeValue)
-  const cleanStore = store ? store : ""
+  /* const cleanStore = store ? store : "" */
 
   // goes to the product page and gets the categories
   const productButton = await page.$(".product-search-category-button")
@@ -161,7 +161,7 @@ void (async () => {
   /* console.log(categoryNodes.length) */
 
   // goes through all the categories and gets their products
-  const products: Omit<ProductEntry, "id">[] = []
+  const products: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
   const failedCategories: (string | undefined)[] = []
   const errors: string[] = []
 
@@ -187,7 +187,7 @@ void (async () => {
     // get the products
     const productNodes = await productContainer?.$$(".product-result-item")
     const cleanedNodes = productNodes ? productNodes : []
-    const details = (await Promise.all(cleanedNodes.map(node => getProductDetails(node)))).map(p => ({ ...p, store: cleanStore }))
+    const details = (await Promise.all(cleanedNodes.map(node => getProductDetails(node)))).map(p => ({ ...p }))
     products.push(...details)
 
     // goes back to the category page
@@ -199,8 +199,8 @@ void (async () => {
   // makes sure the products are unique
   const cleanedProducts = products.filter(p => p.name !== "" && !!p.price)
   const uniqueMap = new Map<string, string>()
-  const uniqueProducts: Omit<ProductEntry, "id">[] = []
-  const duplicateProducts: Omit<ProductEntry, "id">[] = []
+  const uniqueProducts: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
+  const duplicateProducts: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
   cleanedProducts.forEach(p => {
     if (!uniqueMap.get(p.name)) uniqueProducts.push(p)
     else duplicateProducts.push(p)

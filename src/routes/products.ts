@@ -1,10 +1,10 @@
-import express from "express"
+import { Request, Response, Router } from "express"
 import { getStoreById } from "../services/store-service"
 import expressAsyncHandler from "express-async-handler"
 
-const productRouter = express.Router()
+const recipeRouter = Router()
 
-productRouter.get("/", expressAsyncHandler(async (req: express.Request, _res: express.Response): Promise<void> => {
+recipeRouter.get("/", expressAsyncHandler(async (req: Request, _res: Response): Promise<void> => {
   const storeId = req.query.storeId?.toString()
   const store = await getStoreById(storeId)
   if (store) {
@@ -12,4 +12,4 @@ productRouter.get("/", expressAsyncHandler(async (req: express.Request, _res: ex
   }
 }))
 
-export default productRouter
+export default recipeRouter
