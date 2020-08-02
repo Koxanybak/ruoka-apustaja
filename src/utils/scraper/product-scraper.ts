@@ -1,6 +1,8 @@
 import puppeteer from "puppeteer"
 import { ProductScrapeError } from "../errors"
-import { ProductEntry } from "../../types"
+import { ProductEntry, StoreEntry } from "../../types"
+import { pool } from "../config"
+import format from "pg-format"
 
 // scrolls down until no more products are loaded
 const scrollProductList = async (container: puppeteer.ElementHandle<Element> | null) => {
@@ -79,10 +81,11 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
 }
 
 // gets the name of the product node
-const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "storeID" | "id" | "link">> => {
+const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "storeID" | "id">> => {
   return await productNode.evaluate(node => {
     const name = node.querySelector("div.product-result-name > div > div.text-ellipsis.text-ellipsis__2-lines.product-name > span")?.innerHTML
     const imgSrc = node.querySelector("div.product-result-image > div > img")?.getAttribute("src")
+    const link = node.querySelector("a")?.getAttribute("href")
 
     let intPart = node.querySelector("div.product-result-price > span.price > span.price-integer-part")?.innerHTML
     intPart = intPart ? intPart : ""
@@ -101,6 +104,7 @@ const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>):
       pricePerUnit: pricePerUnit ? pricePerUnit : null,
       unit: unit ? unit : null,
       imgSrc: imgSrc ? imgSrc : "/assets/ei-tuotekuvaa.svg",
+      link: link ? `https://www.k-ruoka.fi${link}` : "https://www.k-ruoka.fi",
     }
   })
 }
@@ -132,24 +136,53 @@ const switchStore = async (page: puppeteer.Page, name: string): Promise<void> =>
 }
 
 // main
-void (async () => {
+export const scrape = async (storeID: number): Promise<void> => {
   const browser = await puppeteer.launch({ headless: false, })
   const page = await browser.newPage()
   await page.setViewport({
     width: 1920,
     height: 1080,
   })
-  await page.goto("https://www.k-ruoka.fi/kauppa")
+  await page.goto("https://www.k-ruoka.fi/kauppa", { waitUntil: "networkidle2" })
 
   page.on("console", consoleObj => console.log(consoleObj.text()))
 
-  await switchStore(page, "K-Market Herkkupuoti").catch((err: Error) => { throw new Error(err.message) })
+  // gets the name of the store from db
+  let storeName = "NON_EXISTENT"
+  let client = await pool.connect()
+  try {
+    await client.query("BEGIN")
+    const { rows } = await client.query("SELECT (name) FROM stores WHERE id = $1", [storeID])
+    storeName = (<Pick<StoreEntry, "name">>rows[0]).name
+
+    // replace the weird dash that is causing the search to fail
+    if (!storeName.startsWith("Neste K")) storeName = storeName.substr(0, 1) + "-" + storeName.substr(2)
+
+    // if the search is already running, stop the execution
+    const res = await client.query("UPDATE stores SET searching = $1 WHERE id = $2 RETURNING (SELECT searching FROM stores WHERE id = $2)", [true, storeID])
+    console.log(res.rows[0])
+    if ((<StoreEntry>res.rows[0]).searching) {
+      throw new Error("The search is already running.")
+    }
+    await client.query("COMMIT")
+  } catch (err) {
+    await client.query("ROLLBACK")
+    await browser.close()
+    throw err
+  } finally {
+    client.release()
+  }
+
+  // swithces store to the requested one
+  await switchStore(page, storeName).catch((err: Error) => {
+    void browser.close()
+    throw new Error(err.message)
+  })
   await page.waitFor(2*1000)
 
   // gets the current store
   const storeNode = await page.$(".store-and-chain-selector")
   const store = await storeNode?.evaluate(node => node.childNodes[node.childNodes.length - 1].nodeValue)
-  /* const cleanStore = store ? store : "" */
 
   // goes to the product page and gets the categories
   const productButton = await page.$(".product-search-category-button")
@@ -161,7 +194,7 @@ void (async () => {
   /* console.log(categoryNodes.length) */
 
   // goes through all the categories and gets their products
-  const products: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
+  const products: Omit<ProductEntry, "id">[] = []
   const failedCategories: (string | undefined)[] = []
   const errors: string[] = []
 
@@ -170,6 +203,7 @@ void (async () => {
     categoryNodes = await page.$$(".ProductCategoriesDesktop__categories__category")
     await categoryNodes[i].click()
     const showAllButton = await page.$(".ProductCategoriesDesktop__sub-categories__category.ProductCategoriesDesktop__sub-categories__category__show-all")
+    //console.log(i+1, !!showAllButton)
     await showAllButton?.click()
     const productContainer = await page.$(".product-search-result-list.shopping-list-side-panel-tab-content")
     await page.waitFor(1.5*1000)
@@ -187,7 +221,7 @@ void (async () => {
     // get the products
     const productNodes = await productContainer?.$$(".product-result-item")
     const cleanedNodes = productNodes ? productNodes : []
-    const details = (await Promise.all(cleanedNodes.map(node => getProductDetails(node)))).map(p => ({ ...p }))
+    const details = (await Promise.all(cleanedNodes.map(node => getProductDetails(node)))).map(p => ({ ...p, storeID }))
     products.push(...details)
 
     // goes back to the category page
@@ -199,20 +233,51 @@ void (async () => {
   // makes sure the products are unique
   const cleanedProducts = products.filter(p => p.name !== "" && !!p.price)
   const uniqueMap = new Map<string, string>()
-  const uniqueProducts: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
-  const duplicateProducts: Omit<ProductEntry, "storeID" | "id" | "link">[] = []
+  const uniqueProducts: Omit<ProductEntry, "id">[] = []
+  const duplicateProducts: Omit<ProductEntry, "id">[] = []
   cleanedProducts.forEach(p => {
-    if (!uniqueMap.get(p.name)) uniqueProducts.push(p)
-    else duplicateProducts.push(p)
+    if (!uniqueMap.get(p.name)) {
+      uniqueProducts.push(p)
+      uniqueMap.set(p.name, p.name)
+    } else {
+      duplicateProducts.push(p)
+    }
   })
 
+  // if the scrape didn't manage to get any products, throw an error
+  if (uniqueProducts.length === 0) {
+    await browser.close()
+    throw new Error("Something went wrong scraping the website")
+  }
+
   // logs info
-  uniqueProducts.forEach(p => console.log(p))
+  //uniqueProducts.forEach(p => console.log(p))
   duplicateProducts.forEach(p => console.log(p))
   console.log({store})
   console.log({failedCategories})
   console.log({errors})
 
+  // inserts the products into db and put has_products to true
+  client = await pool.connect()
+  try {
+    await client.query("BEGIN")
+    await client.query("UPDATE stores SET has_products = true WHERE id = $1", [storeID])
+    
+    const values = uniqueProducts.map(p => Object.values(p))
+    const qText = format("INSERT INTO products (name, price, price_per_unit, unit, imgsrc, link, store_id) VALUES %L ON CONFLICT ON CONSTRAINT unique_name_store_id DO UPDATE SET price = EXCLUDED.price, price_per_unit = EXCLUDED.price_per_unit RETURNING (id, name, price, price_per_unit, unit, imgsrc, link, store_id)", values)
+
+    const res = await client.query(qText)
+    res.rows.forEach(p => console.log(p))
+    await client.query("COMMIT")
+  } catch (err) {
+    console.log("was an error", err)
+    await client.query("ROLLBACK")
+    await browser.close()
+    throw err
+  } finally {
+    client.release()
+  }
+
 
   await browser.close()
-})()
+}

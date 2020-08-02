@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StoreEntry, ProductEntry, ProductSearch, SLSearch } from "../types"
+import { StoreEntry, ProductEntry, ProductSearch, SLSearch, LoginBody, UserEntry, ProductCheck } from "../types"
 
 // checkers
 const isString = (object: any): object is string => {
@@ -15,6 +15,9 @@ const isNumber = (object: any): object is number => {
 }
 const isUndef = (object: any): object is undefined => {
   return object === undefined
+}
+const isBoolean = (object: any): object is boolean => {
+  return typeof object === "boolean"
 }
 
 // type parsers
@@ -54,6 +57,12 @@ const parseNumberUndef = (object: any, atrName: string): number | undefined => {
   }
   return object
 }
+export const parseBoolean = (object: any, atrName: string): boolean => {
+  if (!isBoolean(object)) {
+    throw new TypeError(`Incorrect or missing ${atrName}`)
+  }
+  return object
+}
 
 // interface parsers
 export const parseStoreEntry = (object: any): StoreEntry => {
@@ -89,5 +98,24 @@ export const parseSLSearch = (object: any): SLSearch => {
     storeID: parseNumber(object.storeID, "storeID"),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     productSearches: <ProductSearch[]>object.productSearches.map((ps: any) => parseProductSearch(ps)),
+  }
+}
+export const parseLoginBody = (object: any): LoginBody => {
+  return {
+    username: parseString(object.username, "username"),
+    password: parseString(object.password, "password")
+  }
+}
+export const parseUserEntry = (object: any): UserEntry => {
+  return {
+    id: parseNumber(object.id, "id"),
+    username: parseString(object.username, "username"),
+    pwHash: parseString(object.pwHash, "pwHash")
+  }
+}
+export const parseProductCheck = (object: any): ProductCheck => {
+  return {
+    searching: parseBoolean(object.searching, "searching"),
+    has_products: parseBoolean(object.has_products, "has_products"),
   }
 }

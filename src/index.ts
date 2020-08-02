@@ -2,7 +2,7 @@ import express from "express"
 /* import http from "http" */
 import http = require("http")
 import storeRouter from "./routes/stores"
-import shoppingListRouter from "./routes/products"
+import shoppingListRouter from "./routes/shopping-lists"
 import { errorHandler, unknownEndpoint } from "./utils/middleware"
 /* require("express-async-errors") */
 
@@ -15,7 +15,7 @@ app.get("/", (_req: express.Request, res: express.Response): void => {
   res.status(200).send("Hello")
 })
 app.use("/api/stores", storeRouter)
-app.use("/api/products", shoppingListRouter)
+app.use("/api/shoppinglists", shoppingListRouter)
 
 app.use(unknownEndpoint)
 app.use(errorHandler)

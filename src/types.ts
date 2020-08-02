@@ -13,6 +13,7 @@ export interface StoreEntry {
   id: number;
   name: string;
   city: string;
+  searching?: boolean;
 }
 
 export interface ProductSearch {
@@ -28,4 +29,22 @@ export interface SLSearch {
 
 export interface ShoppingList {
   [key: string]: number | ProductEntry[];
+}
+
+export interface LoginBody {
+  username: string;
+  password: string;
+}
+
+export type NewUserEntry = LoginBody
+
+export interface UserEntry {
+  id: number;
+  username: string;
+  pwHash?: string;
+}
+
+export interface ProductCheck {
+  searching: boolean;
+  has_products: boolean;
 }
