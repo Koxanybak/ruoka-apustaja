@@ -1,7 +1,7 @@
 import express from "express"
 import expressAsyncHandler from "express-async-handler"
-import { parseSLSearch } from "../utils/type-parsers"
-import { getProductsForList } from "../services/shopping-list-service"
+import { parseSLSearch, parseShoppingList } from "../utils/type-parsers"
+import { getProductsForList, createShoppingList } from "../services/shopping-list-service"
 
 const shoppingListRouter = express.Router()
 
@@ -13,6 +13,12 @@ shoppingListRouter.get("/", expressAsyncHandler(async (req: express.Request, res
   } else {
     res.status(200).json(shoppingListOrMessage)
   }
+}))
+
+shoppingListRouter.post("/", expressAsyncHandler(async (req: express.Request, res: express.Response): Promise<void> => {
+  const shoppingList = parseShoppingList(req.body)
+  const newShoppingList = await createShoppingList(shoppingList)
+  
 }))
 
 export default shoppingListRouter

@@ -3,7 +3,9 @@ import express from "express"
 export const errorHandler = (err: Error, _req: express.Request, res: express.Response, next: express.NextFunction): void => {
   /* console.error(err.name, err.message) */
   if (err.name === "TypeError") {
-    res.status(500).send({ error: err.message })
+    res.status(400).send({ error: err.message })
+  } else if (err.name === "ValidationError") {
+    res.status(400).send({ error: err.message })
   } else {
     next(err)
   }

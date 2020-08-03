@@ -1,6 +1,7 @@
 import { pool } from "../utils/config"
-import { NewUserEntry, UserEntry } from "../types"
+import { NewUserEntry, UserEntry, LoginBody } from "../types"
 import yup from "yup"
+import { hash } from "bcrypt"
 import { parseUserEntry } from "../utils/type-parsers"
 
 const schema = yup.object().shape({
@@ -9,13 +10,14 @@ const schema = yup.object().shape({
 })
 
 export const createUser = async (userObj: NewUserEntry): Promise<UserEntry> => {
-  const queryText = "INSERT INTO users(username, pwHash) VALUES ($1, $2) RETURNING (id, username)"
+  const queryText = "INSERT INTO users(username, pwHash) VALUES ($1, $2) RETURNING id, username"
   await schema.validate(userObj)
+  const pwHash = await hash(userObj.password, 10)
 
   const client = await pool.connect()
   try {
     await client.query("BEGIN")
-    const { rows } = await client.query(queryText, [userObj.username, /* PASSOWRD HERE */])
+    const { rows } = await client.query(queryText, [userObj.username, pwHash])
     await client.query("COMMIT")
     return parseUserEntry(rows[0])
   } catch (err) {
@@ -26,9 +28,15 @@ export const createUser = async (userObj: NewUserEntry): Promise<UserEntry> => {
   }
 }
 
-export const getUserByID = async (id: number): Promise<UserEntry> => {
-  const queryText = "SELECT id FROM users WHERE id = $1"
+export const getUserByID = async (id: number): Promise<UserEntry | undefined> => {
+  const queryText = "SELECT id, username FROM users WHERE id = $1"
   const { rows } = await pool.query(queryText, [id])
+  return parseUserEntry(rows[0])
+}
+
+export const getUserByName = async (name: string): Promise<UserEntry | undefined> => {
+  const queryText = "SELECT id, username, pwHash FROM users WHERE name = $1"
+  const { rows } = await pool.query(queryText, [name])
   return parseUserEntry(rows[0])
 }
 

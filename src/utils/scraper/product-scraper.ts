@@ -80,7 +80,7 @@ const scrollProductList = async (container: puppeteer.ElementHandle<Element> | n
   })
 }
 
-// gets the name of the product node
+// gets the details of the product node
 const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>): Promise<Omit<ProductEntry, "storeID" | "id">> => {
   return await productNode.evaluate(node => {
     const name = node.querySelector("div.product-result-name > div > div.text-ellipsis.text-ellipsis__2-lines.product-name > span")?.innerHTML
@@ -93,17 +93,20 @@ const getProductDetails = async (productNode: puppeteer.ElementHandle<Element>):
     decPart = decPart ? decPart : ""
     const price = parseFloat(intPart + "." + decPart)
 
-    const pricePerUnitStr = document.querySelector("div.product-result-price > span.reference")?.childNodes[0].nodeValue
+    let id = node.getAttribute("id")?.substr(20)
+    id = id ? id : ""
+
+    const pricePerUnitStr = document.querySelector(`#product-result-item-${id} > div.product-result-price > span.reference`)?.childNodes[0].nodeValue
     const decimalSep = pricePerUnitStr?.replace(",", ".")
     const pricePerUnit = parseFloat(decimalSep ? decimalSep : "")
-    const unit = document.querySelector("div.product-result-price > span.reference > span:nth-child(2)")?.innerHTML
+    const unit = document.querySelector(`#product-result-item-${id} > div.product-result-price > span.reference > span:nth-child(2)`)?.innerHTML
 
     return {
       name: name ? name : "",
       price,
       pricePerUnit: pricePerUnit ? pricePerUnit : null,
       unit: unit ? unit : null,
-      imgSrc: imgSrc ? imgSrc : "/assets/ei-tuotekuvaa.svg",
+      imgSrc: imgSrc ? (imgSrc.startsWith("https") ? imgSrc : "/assets/ei-tuotekuvaa.svg") : "/assets/ei-tuotekuvaa.svg",
       link: link ? `https://www.k-ruoka.fi${link}` : "https://www.k-ruoka.fi",
     }
   })
@@ -208,6 +211,10 @@ export const scrape = async (storeID: number): Promise<void> => {
     const productContainer = await page.$(".product-search-result-list.shopping-list-side-panel-tab-content")
     await page.waitFor(1.5*1000)
 
+    /* if (products.length > 100 && products.length < 300) {
+      console.log(await getCategoryName(page))
+    } */
+
     // scrolling
     await scrollProductList(productContainer).catch(async (err: Error) => {
       console.error(err.message)
@@ -251,8 +258,11 @@ export const scrape = async (storeID: number): Promise<void> => {
   }
 
   // logs info
-  //uniqueProducts.forEach(p => console.log(p))
+  console.log("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+  uniqueProducts.forEach(p => console.log(p))
+  console.log("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
   duplicateProducts.forEach(p => console.log(p))
+  console.log("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
   console.log({store})
   console.log({failedCategories})
   console.log({errors})
@@ -264,10 +274,9 @@ export const scrape = async (storeID: number): Promise<void> => {
     await client.query("UPDATE stores SET has_products = true WHERE id = $1", [storeID])
     
     const values = uniqueProducts.map(p => Object.values(p))
-    const qText = format("INSERT INTO products (name, price, price_per_unit, unit, imgsrc, link, store_id) VALUES %L ON CONFLICT ON CONSTRAINT unique_name_store_id DO UPDATE SET price = EXCLUDED.price, price_per_unit = EXCLUDED.price_per_unit RETURNING (id, name, price, price_per_unit, unit, imgsrc, link, store_id)", values)
+    const qText = format("INSERT INTO products (name, price, price_per_unit, unit, imgsrc, link, store_id) VALUES %L ON CONFLICT ON CONSTRAINT unique_name_store_id DO UPDATE SET price = EXCLUDED.price, price_per_unit = EXCLUDED.price_per_unit, unit = EXCLUDED.unit RETURNING (id, name, price, price_per_unit, unit, imgsrc, link, store_id)", values)
 
-    const res = await client.query(qText)
-    res.rows.forEach(p => console.log(p))
+    await client.query(qText)
     await client.query("COMMIT")
   } catch (err) {
     console.log("was an error", err)

@@ -4,6 +4,8 @@ import http = require("http")
 import storeRouter from "./routes/stores"
 import shoppingListRouter from "./routes/shopping-lists"
 import { errorHandler, unknownEndpoint } from "./utils/middleware"
+import userRouter from "./routes/users"
+import loginRouter from "./routes/login"
 /* require("express-async-errors") */
 
 const PORT = 3000
@@ -11,11 +13,10 @@ const PORT = 3000
 const app = express()
 
 app.use(express.json())
-app.get("/", (_req: express.Request, res: express.Response): void => {
-  res.status(200).send("Hello")
-})
 app.use("/api/stores", storeRouter)
 app.use("/api/shoppinglists", shoppingListRouter)
+app.use("/api/users", userRouter)
+app.use("/api/login", loginRouter)
 
 app.use(unknownEndpoint)
 app.use(errorHandler)

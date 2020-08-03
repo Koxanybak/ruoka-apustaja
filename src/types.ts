@@ -27,7 +27,7 @@ export interface SLSearch {
   productSearches: Array<ProductSearch>;
 }
 
-export interface ShoppingList {
+export interface ShoppingListResult {
   [key: string]: number | ProductEntry[];
 }
 
@@ -47,4 +47,9 @@ export interface UserEntry {
 export interface ProductCheck {
   searching: boolean;
   has_products: boolean;
+}
+
+export interface ShoppingList {
+  storeID: number;
+  productList: number[];
 }
