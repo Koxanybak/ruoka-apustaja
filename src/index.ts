@@ -3,7 +3,7 @@ import express from "express"
 import http = require("http")
 import storeRouter from "./routes/stores"
 import shoppingListRouter from "./routes/shopping-lists"
-import { errorHandler, unknownEndpoint } from "./utils/middleware"
+import { errorHandler, unknownEndpoint, tokenExtractor } from "./utils/middleware"
 import userRouter from "./routes/users"
 import loginRouter from "./routes/login"
 /* require("express-async-errors") */
@@ -13,6 +13,7 @@ const PORT = 3000
 const app = express()
 
 app.use(express.json())
+app.use(tokenExtractor)
 app.use("/api/stores", storeRouter)
 app.use("/api/shoppinglists", shoppingListRouter)
 app.use("/api/users", userRouter)
