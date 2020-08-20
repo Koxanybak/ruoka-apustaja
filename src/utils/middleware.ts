@@ -1,7 +1,7 @@
 import express, {Request, Response, NextFunction} from "express"
 
 // gets the token from the request and sets the token field
-export const tokenExtractor = (req: Request, res: Response, next: NextFunction): void => {
+export const tokenExtractor = (req: Request, _res: Response, next: NextFunction): void => {
   const auth = req.get("authorization")
   if (auth && auth.toLowerCase().startsWith("bearer")) {
     req.token = auth.substr(7)

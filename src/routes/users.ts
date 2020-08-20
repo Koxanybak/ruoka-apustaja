@@ -11,4 +11,6 @@ userRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) => 
   res.status(204).end()
 }))
 
+console.log(!!userRouter)
+
 export default userRouter

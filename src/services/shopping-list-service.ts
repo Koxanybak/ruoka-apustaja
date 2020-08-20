@@ -47,6 +47,7 @@ export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResu
   return shoppingList
 }
 
-export const createShoppingList = async (shoppingList: ShoppingList) => {
+export const createShoppingList = async (_shoppingList: ShoppingList) => {
   const queryText = "INSERT INTO shopping_lists(user_id) VALUES ($1) RETURNING id"
+  console.log(queryText)
 }

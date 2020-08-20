@@ -1,5 +1,5 @@
 import { pool } from "../utils/config"
-import { NewUserEntry, UserEntry, LoginBody } from "../types"
+import { NewUserEntry, UserEntry, } from "../types"
 import yup from "yup"
 import { hash } from "bcrypt"
 import { parseUserEntry } from "../utils/type-parsers"
