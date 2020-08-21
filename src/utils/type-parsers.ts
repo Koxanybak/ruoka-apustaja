@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StoreEntry, ProductEntry, ProductSearch, SLSearch, LoginBody, UserEntry, ProductCheck, ShoppingList } from "../types"
+import {
+  StoreEntry,
+  ProductEntry,
+  ProductSearch,
+  SLSearch,
+  LoginBody,
+  UserEntry,
+  ItemCheck,
+  ShoppingList
+} from "../types"
 
 // checkers
 const isString = (object: any): object is string => {
@@ -133,10 +142,10 @@ export const parseUserEntry = (object: any): UserEntry => {
     pwHash: parseString(object.pwHash, "pwHash")
   }
 }
-export const parseProductCheck = (object: any): ProductCheck => {
+export const parseItemCheck = (object: any): ItemCheck => {
   return {
     searching: parseBoolean(object.searching, "searching"),
-    has_products: parseBoolean(object.has_products, "has_products"),
+    has_items: parseBoolean(object.has_items, "has_items"),
   }
 }
 export const parseShoppingList = (object: any): ShoppingList => {

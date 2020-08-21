@@ -1,14 +1,14 @@
 import { pool } from "../utils/config"
 import { SLSearch, ShoppingListResult, ShoppingList, } from "../types"
-import { parseProductEntry, parseProductCheck } from "../utils/type-parsers"
+import { parseProductEntry, parseItemCheck } from "../utils/type-parsers"
 import { scrape } from "../utils/scraper/product-scraper"
 
 export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResult | string> => {
   // checks if the store has products in db, if not, scrape
   const queryText = "SELECT searching, has_products FROM stores WHERE id = $1"
   const res = await pool.query(queryText, [sl.storeID])
-  const searching = (parseProductCheck(res.rows[0])).searching
-  const has_products = (parseProductCheck(res.rows[0])).has_products
+  const searching = (parseItemCheck(res.rows[0])).searching
+  const has_products = (parseItemCheck(res.rows[0])).has_items
   if (searching) return "The server is searching for products for the store in question. This may take up to 30 min."
   if (!has_products) {
     // starts the scrape

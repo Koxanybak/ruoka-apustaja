@@ -44,9 +44,9 @@ export interface UserEntry {
   pwHash?: string;
 }
 
-export interface ProductCheck {
+export interface ItemCheck {
   searching: boolean;
-  has_products: boolean;
+  has_items: boolean;
 }
 
 export interface ShoppingList {
