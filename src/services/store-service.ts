@@ -9,6 +9,7 @@ export const getStores = async (name: string | undefined, city: string | undefin
   city = city ? city : ""
 
   const res = await pool.query(queryText, [`%${name}%`, `%${city}%`])
+  console.log("stores")
 
   return res.rows.map(row => parseStoreEntry(row))
 }
