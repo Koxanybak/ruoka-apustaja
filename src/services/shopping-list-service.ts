@@ -34,7 +34,6 @@ export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResu
 
   // makes the queries and adds the resulting list to the shopping list object
   const shoppingList: ShoppingListResult = {}
-  shoppingList["storeID"] = sl.storeID
   for (let i = 0; i < sl.productSearches.length; i++) {
     const queryText = "SELECT id, name, price, price_per_unit, unit, imgSrc, store_id, link FROM products WHERE store_id = $1 AND LOWER(name) LIKE ALL($2)"
     const res = await pool.query(queryText, [sl.storeID, sl.productSearches[i].desc])

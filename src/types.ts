@@ -28,7 +28,7 @@ export interface SLSearch {
 }
 
 export interface ShoppingListResult {
-  [key: string]: number | ProductEntry[];
+  [key: string]: ProductEntry[];
 }
 
 export interface LoginBody {

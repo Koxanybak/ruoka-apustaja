@@ -6,13 +6,17 @@ import shoppingListRouter from "./routes/shopping-lists"
 import { errorHandler, unknownEndpoint, tokenExtractor } from "./utils/middleware"
 import userRouter from "./routes/users"
 import loginRouter from "./routes/login"
+import cors from "cors"
 /* require("express-async-errors") */
 
-const PORT = 3000
+const PORT = 3001
 
 const app = express()
 
 app.use(express.json())
+app.use(cors({
+  origin: "http://localhost:3000"
+}))
 app.use(tokenExtractor)
 app.use("/api/stores", storeRouter)
 app.use("/api/shoppinglists", shoppingListRouter)
