@@ -23,7 +23,7 @@ export interface ProductSearch {
 }
 
 export interface SLSearch {
-  storeID: number;
+  storeID: string;
   productSearches: Array<ProductSearch>;
 }
 
@@ -46,7 +46,7 @@ export interface UserEntry {
 
 export interface ItemCheck {
   searching: boolean;
-  has_items: boolean;
+  has_products: boolean;
 }
 
 export interface ShoppingList {

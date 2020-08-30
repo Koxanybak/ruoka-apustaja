@@ -3,3 +3,10 @@ export class ProductScrapeError extends Error {
     super(m)
   }
 }
+
+export class NoContentError extends Error {
+  constructor(m: string) {
+    super(m)
+    this.name = "NoContentError"
+  }
+}

@@ -7,6 +7,7 @@ import { errorHandler, unknownEndpoint, tokenExtractor } from "./utils/middlewar
 import userRouter from "./routes/users"
 import loginRouter from "./routes/login"
 import cors from "cors"
+import productRouter from "./routes/products"
 /* require("express-async-errors") */
 
 const PORT = 3001
@@ -18,6 +19,7 @@ app.use(cors({
   origin: "http://localhost:3000"
 }))
 app.use(tokenExtractor)
+app.use("/api/products", productRouter)
 app.use("/api/stores", storeRouter)
 app.use("/api/shoppinglists", shoppingListRouter)
 app.use("/api/users", userRouter)

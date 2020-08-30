@@ -123,7 +123,7 @@ export const parseProductSearch = (object: any): ProductSearch => {
 }
 export const parseSLSearch = (object: any): SLSearch => {
   return {
-    storeID: parseNumber(object.storeID, "storeID"),
+    storeID: parseString(object.storeID, "storeID"),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     productSearches: <ProductSearch[]>object.productSearches.map((ps: any) => parseProductSearch(ps)),
   }
@@ -145,7 +145,7 @@ export const parseUserEntry = (object: any): UserEntry => {
 export const parseItemCheck = (object: any): ItemCheck => {
   return {
     searching: parseBoolean(object.searching, "searching"),
-    has_items: parseBoolean(object.has_items, "has_items"),
+    has_products: parseBoolean(object.has_products, "has_products"),
   }
 }
 export const parseShoppingList = (object: any): ShoppingList => {
