@@ -1,6 +1,7 @@
 import { pool } from "../utils/config"
-import { StoreEntry } from "../types"
-import { parseStoreEntry } from "../utils/type-parsers"
+import { StoreEntry, ItemCheck } from "../types"
+import { parseStoreEntry, parseItemCheck } from "../utils/type-parsers"
+import { NoContentError } from "../utils/errors"
 
 // gets all the stores
 export const getStores = async (name: string | undefined, city: string | undefined): Promise<StoreEntry[]> => {
@@ -19,5 +20,21 @@ export const getStoreById = async (id: string | undefined): Promise<StoreEntry |
   id = id ? id : ""
   const res = await pool.query(queryText, [parseInt(id)])
 
+  if (res.rows.length === 0) {
+    throw new NoContentError("")
+  }
+
   return res.rows.map(row => parseStoreEntry(row))[0]
+}
+
+// gets and object for the store that tells if the items are being searched currently and if the object has items
+export const getItemCheckById = async (id: string | undefined): Promise<ItemCheck> => {
+  const queryText = "SELECT * FROM stores WHERE id = $1"
+  id = id ? id : ""
+  const res = await pool.query(queryText, [parseInt(id)])
+  if (res.rows.length === 0) {
+    throw new NoContentError("")
+  }
+
+  return res.rows.map(row => parseItemCheck(row))[0]
 }
