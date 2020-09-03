@@ -1,5 +1,4 @@
-import { string } from "pg-format"
-
+// TODO: fix storeID to store_id etc. or shoppingliststuff wont work
 export interface ProductEntry {
   id: number;
   name: string;

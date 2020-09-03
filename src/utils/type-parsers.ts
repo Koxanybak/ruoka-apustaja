@@ -9,7 +9,6 @@ import {
   LoginBody,
   UserEntry,
   ItemCheck,
-  ShoppingList
 } from "../types"
 
 // checkers
@@ -33,7 +32,7 @@ const isArray = (object: any): object is Array<any> => {
 }
 
 // type parsers
-const parseString = (object: any, atrName: string): string => {
+export const parseString = (object: any, atrName: string): string => {
   if (!object || !isString(object)) {
     throw new TypeError(`Incorrect or missing ${atrName}`)
   }
@@ -51,7 +50,7 @@ const parseStringUndef = (object: any, atrName: string): string | undefined => {
   }
   return object
 }
-const parseNumber = (object: any, atrName: string): number => {
+export const parseNumber = (object: any, atrName: string): number => {
   if (!object || !isNumber(object)) {
     if (!isNaN(parseFloat(object))) {
       return parseFloat(object)
@@ -146,11 +145,5 @@ export const parseItemCheck = (object: any): ItemCheck => {
   return {
     searching: parseBoolean(object.searching, "searching"),
     has_products: parseBoolean(object.has_products, "has_products"),
-  }
-}
-export const parseShoppingList = (object: any): ShoppingList => {
-  return {
-    storeID: parseNumber(object.storeID, "id"),
-    productList: parseArray(object.productsList, "productList").map(el => parseNumber(el, "productList"))
   }
 }

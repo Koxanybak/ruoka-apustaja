@@ -7,11 +7,11 @@ import { ShoppingList, ProductEntry } from "../types"
 } */
 
 // creates an empty shoppinglist and returns its id
-export const createEmptyShoppingList = async (user_id: number | string, store_id: number | string): Promise<number> => {
+export const createEmptyShoppingList = async (user_id: number | string, store_id: number | string, name: string): Promise<Omit<ShoppingList, "productList">> => {
   user_id = parseInt(user_id.toString())
   store_id = parseInt(store_id.toString())
-  const queryText = "INSERT INTO shopping_lists(user_id, name) VALUES ($1, $2) RETURNING id, name"
-  const { rows } = await pool.query(queryText, [user_id])
+  const queryText = "INSERT INTO shopping_lists(user_id, store_id, name) VALUES ($1, $2) RETURNING id, store_id, name"
+  const { rows } = await pool.query(queryText, [user_id, store_id, name])
   return rows[0]
 }
 
@@ -48,7 +48,7 @@ export const getShoppingLists = async (user_id: number | string): Promise<Omit<S
 }
 
 // gets contents of the shopping list
-export const getShoppingListItemsById = async (id: number | string): Promise<Omit<ProductEntry, "storeID">[]> => {
+export const getShoppingListItems = async (id: number | string): Promise<Omit<ProductEntry, "storeID">[]> => {
   id = parseInt(id.toString())
   const queryText = "SELECT p.id, p.name, p.price, p.price_per_unit, p.unit, p.imgsrc, p.link FROM shopping_list_items s, products p WHERE s.product_id = p.id AND s.id = $1"
   const { rows } = await pool.query(queryText, [id])
