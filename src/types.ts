@@ -50,6 +50,8 @@ export interface ItemCheck {
 }
 
 export interface ShoppingList {
-  storeID: number;
-  productList: number[];
+  id: number;
+  store_id: number;
+  name: string;
+  productList?: Omit<ProductEntry, "storeID">[];
 }
