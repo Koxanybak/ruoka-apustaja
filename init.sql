@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.3
--- Dumped by pg_dump version 12.3
+-- Dumped from database version 12.4 (Ubuntu 12.4-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.4 (Ubuntu 12.4-0ubuntu0.20.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: products; Type: TABLE; Schema: public; Owner: -
+-- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.products (
@@ -37,8 +37,10 @@ CREATE TABLE public.products (
 );
 
 
+ALTER TABLE public.products OWNER TO postgres;
+
 --
--- Name: products_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: products_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.products_id_seq
@@ -50,15 +52,17 @@ CREATE SEQUENCE public.products_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.products_id_seq OWNER TO postgres;
+
 --
--- Name: products_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: products_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.products_id_seq OWNED BY public.products.id;
 
 
 --
--- Name: shopping_list_items; Type: TABLE; Schema: public; Owner: -
+-- Name: shopping_list_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.shopping_list_items (
@@ -67,19 +71,23 @@ CREATE TABLE public.shopping_list_items (
 );
 
 
+ALTER TABLE public.shopping_list_items OWNER TO postgres;
+
 --
--- Name: shopping_lists; Type: TABLE; Schema: public; Owner: -
+-- Name: shopping_lists; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.shopping_lists (
     id integer NOT NULL,
-    user_id integer,
+    user_id integer NOT NULL,
     date_created timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
+ALTER TABLE public.shopping_lists OWNER TO postgres;
+
 --
--- Name: shopping_lists_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: shopping_lists_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.shopping_lists_id_seq
@@ -91,15 +99,17 @@ CREATE SEQUENCE public.shopping_lists_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.shopping_lists_id_seq OWNER TO postgres;
+
 --
--- Name: shopping_lists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: shopping_lists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.shopping_lists_id_seq OWNED BY public.shopping_lists.id;
 
 
 --
--- Name: stores; Type: TABLE; Schema: public; Owner: -
+-- Name: stores; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.stores (
@@ -111,8 +121,10 @@ CREATE TABLE public.stores (
 );
 
 
+ALTER TABLE public.stores OWNER TO postgres;
+
 --
--- Name: stores_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: stores_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.stores_id_seq
@@ -124,15 +136,17 @@ CREATE SEQUENCE public.stores_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.stores_id_seq OWNER TO postgres;
+
 --
--- Name: stores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: stores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.stores_id_seq OWNED BY public.stores.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -143,8 +157,10 @@ CREATE TABLE public.users (
 );
 
 
+ALTER TABLE public.users OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -156,43 +172,45 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+ALTER TABLE public.users_id_seq OWNER TO postgres;
+
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: products id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: products id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products ALTER COLUMN id SET DEFAULT nextval('public.products_id_seq'::regclass);
 
 
 --
--- Name: shopping_lists id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: shopping_lists id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shopping_lists ALTER COLUMN id SET DEFAULT nextval('public.shopping_lists_id_seq'::regclass);
 
 
 --
--- Name: stores id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: stores id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.stores ALTER COLUMN id SET DEFAULT nextval('public.stores_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.products (id, name, store_id, price, price_per_unit, unit, imgsrc, link, date_created) FROM stdin;
@@ -4800,7 +4818,7 @@ COPY public.products (id, name, store_id, price, price_per_unit, unit, imgsrc, l
 
 
 --
--- Data for Name: shopping_list_items; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: shopping_list_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.shopping_list_items (product_id, shopping_list_id) FROM stdin;
@@ -4808,7 +4826,7 @@ COPY public.shopping_list_items (product_id, shopping_list_id) FROM stdin;
 
 
 --
--- Data for Name: shopping_lists; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: shopping_lists; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.shopping_lists (id, user_id, date_created) FROM stdin;
@@ -4816,7 +4834,7 @@ COPY public.shopping_lists (id, user_id, date_created) FROM stdin;
 
 
 --
--- Data for Name: stores; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: stores; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.stores (id, name, city, has_products, searching) FROM stdin;
@@ -5988,7 +6006,7 @@ COPY public.stores (id, name, city, has_products, searching) FROM stdin;
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.users (id, username, pwhash, date_created) FROM stdin;
@@ -5996,35 +6014,35 @@ COPY public.users (id, username, pwhash, date_created) FROM stdin;
 
 
 --
--- Name: products_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: products_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.products_id_seq', 14029, true);
 
 
 --
--- Name: shopping_lists_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: shopping_lists_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.shopping_lists_id_seq', 1, false);
 
 
 --
--- Name: stores_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: stores_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.stores_id_seq', 5103, true);
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 
 
 --
--- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products
@@ -6032,7 +6050,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- Name: shopping_list_items shopping_list_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_list_items shopping_list_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shopping_list_items
@@ -6040,7 +6058,7 @@ ALTER TABLE ONLY public.shopping_list_items
 
 
 --
--- Name: shopping_lists shopping_lists_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_lists shopping_lists_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shopping_lists
@@ -6048,7 +6066,7 @@ ALTER TABLE ONLY public.shopping_lists
 
 
 --
--- Name: stores store_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: stores store_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.stores
@@ -6056,7 +6074,7 @@ ALTER TABLE ONLY public.stores
 
 
 --
--- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: stores stores_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.stores
@@ -6064,7 +6082,7 @@ ALTER TABLE ONLY public.stores
 
 
 --
--- Name: products unique_name_store_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: products unique_name_store_id; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products
@@ -6072,7 +6090,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -6080,7 +6098,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -6088,36 +6106,52 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: idx_city; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_city; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX idx_city ON public.stores USING btree (city);
 
 
 --
--- Name: idx_name; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_name; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX idx_name ON public.stores USING btree (name);
 
 
 --
--- Name: idx_name_city; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_name_city; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX idx_name_city ON public.stores USING btree (name, city);
 
 
 --
--- Name: shopping_lists shopping_lists_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: shopping_list_items shopping_list_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shopping_list_items
+    ADD CONSTRAINT shopping_list_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: shopping_list_items shopping_list_items_shopping_list_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shopping_list_items
+    ADD CONSTRAINT shopping_list_items_shopping_list_id_fkey FOREIGN KEY (shopping_list_id) REFERENCES public.shopping_lists(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: shopping_lists shopping_lists_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shopping_lists
-    ADD CONSTRAINT shopping_lists_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+    ADD CONSTRAINT shopping_lists_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: products store_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: products store_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products
