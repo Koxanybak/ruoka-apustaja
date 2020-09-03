@@ -17,6 +17,10 @@ export const errorHandler = (err: Error, req: express.Request, res: express.Resp
     res.status(400).send({ error: err.message })
   } else if (err.name === "NoContentError") {
     unknownEndpoint(req, res)
+  } else if (err.name === "InvalidTokenError") {
+    res.status(401).send({ error: err.message })
+  } else if (err.name === "JsonWebTokenError") {
+    res.status(401).send({ error: "Invalid token" })
   } else {
     next(err)
   }

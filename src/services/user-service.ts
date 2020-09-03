@@ -1,9 +1,10 @@
-import { pool } from "../utils/config"
-import { NewUserEntry, UserEntry, } from "../types"
+import { pool, SECRET } from "../utils/config"
+import { NewUserEntry, UserEntry, TokenUser, } from "../types"
 import * as yup from "yup"
 import { hash } from "bcrypt"
 import { parseUserEntry } from "../utils/type-parsers"
-import { NoContentError } from "../utils/errors"
+import { NoContentError, InvalidTokenError } from "../utils/errors"
+import jwt from "jsonwebtoken"
 
 const schema = yup.object().shape({
   username: yup.string().required().max(50).min(4).trim().strict(true),
@@ -46,4 +47,11 @@ export const isNameAvailable = async (name: string): Promise<boolean> => {
   const queryText = "SELECT id FROM users WHERE name = $1"
   const { rows } = await pool.query(queryText, [name])
   return rows.length === 0
+}
+
+// gets the user from token and throws an error if authentication fails
+export const getUserFromToken = async (token: string | undefined): Promise<TokenUser> => {
+  if (!token) throw new InvalidTokenError("Token missing")
+  const userFromToken = <TokenUser>jwt.verify(token, SECRET)
+  return userFromToken
 }

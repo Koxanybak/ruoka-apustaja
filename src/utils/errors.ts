@@ -10,3 +10,10 @@ export class NoContentError extends Error {
     this.name = "NoContentError"
   }
 }
+
+export class InvalidTokenError extends Error {
+  constructor(m: string) {
+    super(m)
+    this.name = "InvalidTokenError"
+  }
+}

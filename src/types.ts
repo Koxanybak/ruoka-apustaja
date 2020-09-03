@@ -1,3 +1,5 @@
+import { string } from "pg-format"
+
 export interface ProductEntry {
   id: number;
   name: string;
@@ -54,4 +56,9 @@ export interface ShoppingList {
   store_id: number;
   name: string;
   productList?: Omit<ProductEntry, "storeID">[];
+}
+
+export interface TokenUser {
+  id: number;
+  username: string;
 }
