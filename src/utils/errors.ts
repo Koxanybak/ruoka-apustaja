@@ -17,3 +17,17 @@ export class InvalidTokenError extends Error {
     this.name = "InvalidTokenError"
   }
 }
+
+export class BadRequestError extends Error {
+  constructor(m: string) {
+    super(m)
+    this.name = "BadRequestError"
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(m: string) {
+    super(m)
+    this.name = "ForbiddenError"
+  }
+}

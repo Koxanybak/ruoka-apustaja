@@ -9,6 +9,7 @@ import {
   LoginBody,
   UserEntry,
   ItemCheck,
+  ShoppingList,
 } from "../types"
 
 // checkers
@@ -145,5 +146,13 @@ export const parseItemCheck = (object: any): ItemCheck => {
   return {
     searching: parseBoolean(object.searching, "searching"),
     has_products: parseBoolean(object.has_products, "has_products"),
+  }
+}
+export const parseShoppingList = (obj: any): ShoppingList => {
+  return {
+    id: parseNumber(obj.id, "id"),
+    name: parseString(obj.name, "name"),
+    store_id: parseNumber(obj.store_id, "store_id"),
+    user_id: parseNumber(obj.user_id, "user_id"),
   }
 }

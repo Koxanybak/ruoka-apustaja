@@ -6,7 +6,7 @@ import shoppingListRouter from "./shopping-lists"
 
 const userRouter = Router()
 
-userRouter.use("/shoppinglists", shoppingListRouter)
+userRouter.use(":user_id/shoppinglists", shoppingListRouter)
 
 userRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) => {
   const newUser = parseNewUserEntry(req.body)

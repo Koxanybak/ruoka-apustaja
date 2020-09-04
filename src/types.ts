@@ -54,6 +54,7 @@ export interface ShoppingList {
   id: number;
   store_id: number;
   name: string;
+  user_id: number;
   productList?: Omit<ProductEntry, "storeID">[];
 }
 

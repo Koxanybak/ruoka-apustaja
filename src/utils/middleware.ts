@@ -21,6 +21,10 @@ export const errorHandler = (err: Error, req: express.Request, res: express.Resp
     res.status(401).send({ error: err.message })
   } else if (err.name === "JsonWebTokenError") {
     res.status(401).send({ error: "Invalid token" })
+  } else if (err.name === "BadRequestError") {
+    res.status(400).send({ error: err.message })
+  } else if (err.name === "ForbiddenError") {
+    res.status(403).send({ error: err.message })
   } else {
     next(err)
   }
