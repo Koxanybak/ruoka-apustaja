@@ -80,7 +80,9 @@ ALTER TABLE public.shopping_list_items OWNER TO postgres;
 CREATE TABLE public.shopping_lists (
     id integer NOT NULL,
     user_id integer NOT NULL,
-    date_created timestamp without time zone DEFAULT now() NOT NULL
+    date_created timestamp without time zone DEFAULT now() NOT NULL,
+    name text NOT NULL,
+    store_id integer NOT NULL
 );
 
 
@@ -4829,7 +4831,7 @@ COPY public.shopping_list_items (product_id, shopping_list_id) FROM stdin;
 -- Data for Name: shopping_lists; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.shopping_lists (id, user_id, date_created) FROM stdin;
+COPY public.shopping_lists (id, user_id, date_created, name, store_id) FROM stdin;
 \.
 
 
@@ -6140,6 +6142,14 @@ ALTER TABLE ONLY public.shopping_list_items
 
 ALTER TABLE ONLY public.shopping_list_items
     ADD CONSTRAINT shopping_list_items_shopping_list_id_fkey FOREIGN KEY (shopping_list_id) REFERENCES public.shopping_lists(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: shopping_lists shopping_lists_store_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shopping_lists
+    ADD CONSTRAINT shopping_lists_store_id_fkey FOREIGN KEY (store_id) REFERENCES public.stores(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
