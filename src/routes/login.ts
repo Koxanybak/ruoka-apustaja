@@ -19,7 +19,7 @@ loginRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) =>
       id: userInDb.id,
       username: userInDb.username
     }
-    const token = jwt.sign(userForToken, SECRET)
+    const token = jwt.sign(userForToken, SECRET, { expiresIn: 30*60 })
     res.status(200).json({ ...userForToken, token })
   }
 }))

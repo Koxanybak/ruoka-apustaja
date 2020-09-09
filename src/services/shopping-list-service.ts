@@ -25,12 +25,13 @@ export const deleteShoppingList = async (shopping_list_id: number | string) => {
 }
 
 // adds an items to the shopping list
-export const addItemToShoppingList = async (shopping_list_id: string | number, product_id: string | number) => {
+export const addItemToShoppingList = async (shopping_list_id: string | number, product_id: string | number): Promise<ProductEntry> => {
   shopping_list_id = parseInt(shopping_list_id.toString())
   product_id = parseInt(product_id.toString())
-  const shopping_list = getShoppingListById(shopping_list_id)
-  const product = getProductById(product_id.toString())
-  if ((await shopping_list)?.store_id !== (await product)?.storeID) throw new BadRequestError("The product must be from the store of the shopping list")
+  const shopping_list = await getShoppingListById(shopping_list_id)
+  const product = await getProductById(product_id.toString())
+  if (!product) throw new BadRequestError("The product does not exist")
+  if (shopping_list?.store_id !== product.storeID) throw new BadRequestError("The product must be from the store of the shopping list")
   const queryText = "INSERT INTO shopping_list_items(shopping_list_id, product_id) VALUES ($1, $2) RETURNING product_id"
   const { rows } = await pool.query(queryText, [shopping_list_id, product_id])
   return rows[0]
