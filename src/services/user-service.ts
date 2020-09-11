@@ -11,7 +11,7 @@ const schema = yup.object().shape({
   password: yup.string().required().max(50).min(9).trim().strict(true),
 })
 
-export const createUser = async (userObj: NewUserEntry): Promise<UserEntry> => {
+export const createUser = async (userObj: NewUserEntry): Promise<Omit<UserEntry, "pwHash">> => {
   const queryText = "INSERT INTO users(username, pwHash) VALUES ($1, $2) RETURNING id, username"
   await schema.validate(userObj)
   const pwHash = await hash(userObj.password, 10)
