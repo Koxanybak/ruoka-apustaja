@@ -7,7 +7,7 @@ import { InvalidTokenError } from "../utils/errors"
 import jwt from "jsonwebtoken"
 
 const schema = yup.object().shape({
-  username: yup.string().required().max(50).min(4).trim().strict(true),
+  username: yup.string().required().max(20).min(4).trim().strict(true),
   password: yup.string().required().max(50).min(9).trim().strict(true),
 })
 
