@@ -3,7 +3,7 @@ import { NewUserEntry, UserEntry, TokenUser, } from "../types"
 import * as yup from "yup"
 import { hash } from "bcrypt"
 import { parseUserEntry } from "../utils/type-parsers"
-import { NoContentError, InvalidTokenError } from "../utils/errors"
+import { InvalidTokenError } from "../utils/errors"
 import jwt from "jsonwebtoken"
 
 const schema = yup.object().shape({
@@ -33,13 +33,14 @@ export const createUser = async (userObj: NewUserEntry): Promise<UserEntry> => {
 export const getUserByID = async (id: number): Promise<UserEntry | undefined> => {
   const queryText = "SELECT id, username FROM users WHERE id = $1"
   const { rows } = await pool.query(queryText, [id])
-  if (rows.length === 0) throw new NoContentError("User not found")
+  if (rows.length === 0) return undefined
   return parseUserEntry(rows[0])
 }
 
 export const getUserByName = async (name: string): Promise<UserEntry | undefined> => {
-  const queryText = "SELECT id, username, pwHash FROM users WHERE name = $1"
+  const queryText = "SELECT id, username, pwHash FROM users WHERE username = $1"
   const { rows } = await pool.query(queryText, [name])
+  if (rows.length === 0) return undefined
   return parseUserEntry(rows[0])
 }
 
