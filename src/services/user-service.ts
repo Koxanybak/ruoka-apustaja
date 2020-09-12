@@ -3,7 +3,7 @@ import { NewUserEntry, UserEntry, TokenUser, } from "../types"
 import * as yup from "yup"
 import { hash } from "bcrypt"
 import { parseUserEntry } from "../utils/type-parsers"
-import { InvalidTokenError } from "../utils/errors"
+import { BadRequestError, InvalidTokenError } from "../utils/errors"
 import jwt from "jsonwebtoken"
 
 const schema = yup.object().shape({
@@ -12,6 +12,8 @@ const schema = yup.object().shape({
 })
 
 export const createUser = async (userObj: NewUserEntry): Promise<Omit<UserEntry, "pwHash">> => {
+  if (!(await isNameAvailable(userObj.username))) throw new BadRequestError("Username already taken.")
+
   const queryText = "INSERT INTO users(username, pwHash) VALUES ($1, $2) RETURNING id, username"
   await schema.validate(userObj)
   const pwHash = await hash(userObj.password, 10)
@@ -45,7 +47,7 @@ export const getUserByName = async (name: string): Promise<UserEntry | undefined
 }
 
 export const isNameAvailable = async (name: string): Promise<boolean> => {
-  const queryText = "SELECT id FROM users WHERE name = $1"
+  const queryText = "SELECT id FROM users WHERE username = $1"
   const { rows } = await pool.query(queryText, [name])
   return rows.length === 0
 }

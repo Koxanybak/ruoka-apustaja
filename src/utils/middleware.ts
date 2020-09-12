@@ -32,6 +32,9 @@ export const errorHandler = (err: Error, req: express.Request, res: express.Resp
   else if (err.name === "ForbiddenError") {
     res.status(403).send({ error: err.message })
   }
+  else if (err.name === "ProductScrapeError") {
+    res.status(501).send({ error: err.message })
+  }
   else {
     next(err)
   }

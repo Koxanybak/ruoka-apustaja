@@ -4,8 +4,9 @@ import { SLSearch, ShoppingListResult, } from "../types"
 import { parseProductEntry, } from "../utils/type-parsers"
 import { scrape } from "../utils/scraper/product-scraper"
 import { getItemCheckById } from "./store-service"
+import { ProductScrapeError } from "../utils/errors"
 
-// CHANGE FROM STORE TO PRODUCT
+const searching_per_store: { [store_id: number]: boolean; } = {}
 
 // gets all the stores
 export const getProducts = async (name: string | undefined, city: string | undefined): Promise<ProductEntry[]> => {
@@ -22,24 +23,29 @@ export const getProducts = async (name: string | undefined, city: string | undef
 
 // gets the products for the search object and formats them
 // so that the field of the resulting object is the searchstring and the value is the productlist for the search
-export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResult | string> => {
+export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResult> => {
   // checks if the store has products in db, if not, scrape
   const { searching, has_products } = await getItemCheckById(sl.storeID)
-  if (searching) return "The server is searching for products for the store in question. This may take up to 30 min."
+  if (searching) throw new ProductScrapeError(
+    `Näyttäisi siltä, että kyseisen kaupan tuotteita ei ole vielä tietokannassa.
+    Palvelin aloitti tuotteiden etsinnän. Siinä voi kestää 15-80 minuttia riippuen kaupan koosta.`
+  )
 
   const storeID = parseInt(sl.storeID)
   if (!has_products) {
-    // starts the scrape
+    // starts the scrape and update searching object
+    searching_per_store[storeID] = true
     void scrape(storeID)
       .then(() => {
-        void pool.query("UPDATE stores SET searching = $1 WHERE id = $2", [false, storeID])
+        searching_per_store[storeID] = false
       })
-      .catch((err: Error) => {
-        if (err.message !== "The search is already running.") {
-          void pool.query("UPDATE stores SET searching = $1 WHERE id = $2", [false, storeID])
-        }
+      .catch(() => {
+        searching_per_store[storeID] = false
       })
-    return "It appears that there is no products in the database for the store in question. The server started searching for products for the store in question. This may take up to 30 min."
+    throw new ProductScrapeError(
+      `Näyttäisi siltä, että kyseisen kaupan tuotteita ei ole vielä tietokannassa.
+      Palvelin aloitti tuotteiden etsinnän. Siinä voi kestää 15-80 minuttia riippuen kaupan koosta.`
+    )
   }
 
   // formats the search object for the db query

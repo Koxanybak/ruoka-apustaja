@@ -162,11 +162,11 @@ export const scrape = async (storeID: number): Promise<void> => {
     if (!storeName.startsWith("Neste K")) storeName = storeName.substr(0, 1) + "-" + storeName.substr(2)
 
     // if the search is already running, stop the execution
-    const res = await client.query("UPDATE stores SET searching = $1 WHERE id = $2 RETURNING (SELECT searching FROM stores WHERE id = $2)", [true, storeID])
+    /* const res = await client.query("UPDATE stores SET searching = $1 WHERE id = $2 RETURNING (SELECT searching FROM stores WHERE id = $2)", [true, storeID])
     console.log(res.rows[0])
     if ((<StoreEntry>res.rows[0]).searching) {
       throw new Error("The search is already running.")
-    }
+    } */
     await client.query("COMMIT")
   } catch (err) {
     await client.query("ROLLBACK")

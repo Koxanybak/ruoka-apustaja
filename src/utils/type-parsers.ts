@@ -139,7 +139,7 @@ export const parseUserEntry = (object: any): UserEntry => {
   return {
     id: parseNumber(object.id, "id"),
     username: parseString(object.username, "username"),
-    pwHash: parseString(object.pwHash, "pwHash")
+    pwHash: parseStringUndef(object.pwhash, "pwHash")
   }
 }
 export const parseItemCheck = (object: any): ItemCheck => {
