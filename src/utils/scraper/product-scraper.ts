@@ -281,12 +281,10 @@ export const scrape = async (storeID: number): Promise<void> => {
   } catch (err) {
     console.log("was an error", err)
     await client.query("ROLLBACK")
-    await browser.close()
     throw err
   } finally {
     client.release()
+    await browser.close()
   }
-
-
-  await browser.close()
+  return
 }

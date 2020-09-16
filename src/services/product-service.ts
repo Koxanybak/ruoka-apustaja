@@ -25,13 +25,13 @@ export const getProducts = async (name: string | undefined, city: string | undef
 // so that the field of the resulting object is the searchstring and the value is the productlist for the search
 export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResult> => {
   // checks if the store has products in db, if not, scrape
-  const { searching, has_products } = await getItemCheckById(sl.storeID)
-  if (searching) throw new ProductScrapeError(
+  const storeID = parseInt(sl.storeID)
+  const { has_products } = await getItemCheckById(sl.storeID)
+  if (searching_per_store[storeID]) throw new ProductScrapeError(
     `Näyttäisi siltä, että kyseisen kaupan tuotteita ei ole vielä tietokannassa.
     Palvelin aloitti tuotteiden etsinnän. Siinä voi kestää 15-80 minuttia riippuen kaupan koosta.`
   )
 
-  const storeID = parseInt(sl.storeID)
   if (!has_products) {
     // starts the scrape and update searching object
     searching_per_store[storeID] = true
