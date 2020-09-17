@@ -42,6 +42,7 @@ shoppingListRouter.delete("/:id", expressAsyncHandler(async (req: Request, res: 
 }))
 
 shoppingListRouter.get("/", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
+  console.log("hitted list router")
   const loggedUser = await getUserFromToken(req.token)
   const url_user_id = req.params.user_id
   checkUserFromTokenAndUrl(loggedUser, url_user_id)

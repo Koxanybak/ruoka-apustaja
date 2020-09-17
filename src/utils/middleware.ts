@@ -2,10 +2,10 @@ import express, {Request, Response, NextFunction} from "express"
 
 // gets the token from the request and sets the token field
 export const tokenExtractor = (req: Request, _res: Response, next: NextFunction): void => {
-  const auth = req.get("authorization")
-  if (auth && auth.toLowerCase().startsWith("bearer")) {
-    req.token = auth.substr(7)
-  } else req.token = undefined
+  const token = req.headers.cookie
+  console.log("Got the token:", token)
+  req.token = token
+
   next()
 }
 
@@ -18,6 +18,7 @@ export const errorHandler = (err: Error, req: express.Request, res: express.Resp
     res.status(400).send({ error: err.message })
   }
   else if (err.name === "NoContentError") {
+    console.trace()
     unknownEndpoint(req, res)
   }
   else if (err.name === "InvalidTokenError") {
