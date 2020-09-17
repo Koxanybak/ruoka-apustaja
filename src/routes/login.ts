@@ -4,7 +4,7 @@ import { parseLoginBody } from "../utils/type-parsers"
 import { getUserByName } from "../services/user-service"
 import { compare } from "bcrypt"
 import jwt from "jsonwebtoken"
-import { SECRET } from "../utils/config"
+import { cookie_name, SECRET } from "../utils/config"
 
 const loginRouter = Router()
 
@@ -20,7 +20,7 @@ loginRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) =>
       username: userInDb.username
     }
     const token = jwt.sign(userForToken, SECRET, { expiresIn: 30*60 })
-    res.cookie("token", token, { httpOnly: true, sameSite: true })
+    res.cookie(cookie_name, token, { httpOnly: true, sameSite: true })
     res.status(200).json({ ...userForToken, token })
   }
 }))

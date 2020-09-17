@@ -15,4 +15,7 @@ const SECRET = <string>process.env.SECRET
 if (!SECRET) {
   process.exit()
 }
-export { SECRET, pool }
+
+const cookie_name = "ruoka_apustaja_jwt"
+
+export { SECRET, pool, cookie_name }
