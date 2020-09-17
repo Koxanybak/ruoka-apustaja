@@ -8,8 +8,28 @@ import { ForbiddenError } from "../utils/errors"
 
 const shoppingListRouter = Router()
 
-const checkUserFromTokenAndUrl = (loggedUser: TokenUser, url_user_id: string): void => {
+// Checks if the user from the url mathces the user from the token
+const checkUserFromTokenAndUrl = (loggedUser: TokenUser, url: string): void => {
+  let url_user_id = ""
+  let slashes_found = 0
+  for (let i = url.length - 1; i >= 0 && slashes_found < 2; i--) {
+    const c = url.charAt(i)
+    if (slashes_found === 1 && c !== "/") url_user_id += c
+    if (c === "/") slashes_found++
+  }
+  url_user_id = url_user_id.split("").reverse().join()
   if (loggedUser.id.toString() !== url_user_id) throw new ForbiddenError("User from token doesn't match the url")
+}
+
+// Gets the shopping_list_id from the request and throws an error
+const validate_and_get_list_id_and_logged_user = async (req: Request): Promise<{ loggedUser: TokenUser; shopping_list_id: string }> => {
+  const shopping_list_id = req.params.id
+  const loggedUser = await getUserFromToken(req.token)
+  
+  const url = req.baseUrl
+  checkUserFromTokenAndUrl(loggedUser, url)
+
+  return { loggedUser, shopping_list_id }
 }
 
 shoppingListRouter.post("/", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -17,20 +37,15 @@ shoppingListRouter.post("/", expressAsyncHandler(async (req: Request, res: Respo
   const store_id = parseNumber(req.body.store_id, "store_id")
   const loggedUser = await getUserFromToken(req.token)
 
-  const url_user_id = req.params.user_id
-  console.log("url_user_id:", url_user_id)
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const url = req.baseUrl
+  checkUserFromTokenAndUrl(loggedUser, url)
 
   const newShoppingList = await createEmptyShoppingList(loggedUser.id, store_id, name)
   res.status(201).json(newShoppingList)
 }))
 
 shoppingListRouter.delete("/:id", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const shopping_list_id = req.params.id
-  const loggedUser = await getUserFromToken(req.token)
-  const url_user_id = req.params.user_id
-  console.log("url_user_id:", url_user_id)
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const { loggedUser, shopping_list_id } = await validate_and_get_list_id_and_logged_user(req)
 
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(204).end()
@@ -42,20 +57,14 @@ shoppingListRouter.delete("/:id", expressAsyncHandler(async (req: Request, res: 
 }))
 
 shoppingListRouter.get("/", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  console.log("hitted list router")
-  const loggedUser = await getUserFromToken(req.token)
-  const url_user_id = req.params.user_id
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const { loggedUser } = await validate_and_get_list_id_and_logged_user(req)
 
   const shoppingLists = await getShoppingLists(loggedUser.id)
   res.status(200).json(shoppingLists)
 }))
 
 shoppingListRouter.get("/:shopping_list_id/items", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const shopping_list_id = req.params.shopping_list_id
-  const loggedUser = await getUserFromToken(req.token)
-  const url_user_id = req.params.user_id
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const { loggedUser, shopping_list_id } = await validate_and_get_list_id_and_logged_user(req)
 
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(404).end()
@@ -67,10 +76,7 @@ shoppingListRouter.get("/:shopping_list_id/items", expressAsyncHandler(async (re
 }))
 
 shoppingListRouter.post("/:shopping_list_id/items", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const shopping_list_id = req.params.shopping_list_id
-  const loggedUser = await getUserFromToken(req.token)
-  const url_user_id = req.params.user_id
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const { loggedUser, shopping_list_id } = await validate_and_get_list_id_and_logged_user(req)
 
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(404).end()
@@ -83,10 +89,7 @@ shoppingListRouter.post("/:shopping_list_id/items", expressAsyncHandler(async (r
 }))
 
 shoppingListRouter.delete("/:shopping_list_id/items/:id", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const shopping_list_id = req.params.shopping_list_id
-  const loggedUser = await getUserFromToken(req.token)
-  const url_user_id = req.params.user_id
-  checkUserFromTokenAndUrl(loggedUser, url_user_id)
+  const { loggedUser, shopping_list_id } = await validate_and_get_list_id_and_logged_user(req)
 
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(404).end()
