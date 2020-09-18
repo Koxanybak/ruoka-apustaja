@@ -1,12 +1,17 @@
 import { Router, Request, Response } from "express"
 import expressAsyncHandler from "express-async-handler"
 import { parseLoginBody } from "../utils/type-parsers"
-import { getUserByName } from "../services/user-service"
+import { getUserByName, getUserFromToken } from "../services/user-service"
 import { compare } from "bcrypt"
 import jwt from "jsonwebtoken"
 import { cookie_name, SECRET } from "../utils/config"
 
 const loginRouter = Router()
+
+loginRouter.get("/", expressAsyncHandler(async (req: Request, res: Response) => {
+  const logged_user = await getUserFromToken(req.token)
+  res.status(200).json(logged_user)
+}))
 
 loginRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) => {
   const loginBody = parseLoginBody(req.body)
