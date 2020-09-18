@@ -1,7 +1,7 @@
 version: "3.5"
 
 services: 
-    ruoka-api:
+    api:
         build: .
         ports:
             - 3001:3001
@@ -11,7 +11,7 @@ services:
         image: postgres
         volumes:
             - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-        container_name: db
+        container_name: ruoka-db
         environment: 
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=ruoka_apustaja
