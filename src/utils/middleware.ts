@@ -1,12 +1,11 @@
 import express, {Request, Response, NextFunction} from "express"
-import { cookie_name } from "./config"
 
 // gets the token from the request and sets the token field
 export const tokenExtractor = (req: Request, _res: Response, next: NextFunction): void => {
-  const cookies = req.headers.cookie
-  const token = cookies?.substr(cookie_name.length + 1)
-  console.log("Got the token:", token)
-  req.token = token
+  const auth = req.headers.authorization
+  if (auth && auth.toLowerCase().startsWith("bearer")) {
+    req.token = auth.substr(7)
+  }
 
   next()
 }

@@ -16,6 +16,7 @@ if (!SECRET) {
   process.exit()
 }
 
-const cookie_name = "ruoka_apustaja_jwt"
+const REFRESH_COOKIE_NAME = "ruoka_apustaja_refresh_token"
+const DEFAULT_TOKEN_EXP_SEC = 30*60
 
-export { SECRET, pool, cookie_name }
+export { SECRET, pool, REFRESH_COOKIE_NAME, DEFAULT_TOKEN_EXP_SEC }

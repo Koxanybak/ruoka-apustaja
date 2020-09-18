@@ -4,12 +4,15 @@ import { parseLoginBody } from "../utils/type-parsers"
 import { getUserByName, getUserFromToken } from "../services/user-service"
 import { compare } from "bcrypt"
 import jwt from "jsonwebtoken"
-import { cookie_name, SECRET } from "../utils/config"
+import { REFRESH_COOKIE_NAME, DEFAULT_TOKEN_EXP_SEC, SECRET } from "../utils/config"
+import { AES } from "crypto-js";
 
 const loginRouter = Router()
 
 loginRouter.get("/", expressAsyncHandler(async (req: Request, res: Response) => {
-  const logged_user = await getUserFromToken(req.token)
+  const refresh_token = req.cookies[REFRESH_COOKIE_NAME]
+  if (!refresh_token) res.status(401).send({ error: "Refresh token missing." })
+  const logged_user = await getUserFromToken(AES.decrypt(refresh_token, SECRET).toString())
   res.status(200).json(logged_user)
 }))
 
@@ -22,11 +25,14 @@ loginRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) =>
   } else {
     const userForToken = {
       id: userInDb.id,
-      username: userInDb.username
+      username: userInDb.username,
     }
-    const token = jwt.sign(userForToken, SECRET, { expiresIn: 30*60 })
-    res.cookie(cookie_name, token, { httpOnly: true, sameSite: true })
-    res.status(200).json({ ...userForToken, token })
+    const access_token = jwt.sign(userForToken, SECRET, { expiresIn: DEFAULT_TOKEN_EXP_SEC })
+
+    const refresh_token = AES.encrypt(access_token, SECRET).toString()
+
+    res.cookie(REFRESH_COOKIE_NAME, refresh_token, { sameSite: true, maxAge: DEFAULT_TOKEN_EXP_SEC })
+    res.status(200).json({ ...userForToken, access_token, })
   }
 }))
 

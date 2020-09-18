@@ -61,4 +61,5 @@ export interface ShoppingList {
 export interface TokenUser {
   id: number;
   username: string;
+  access_token: string;
 }
