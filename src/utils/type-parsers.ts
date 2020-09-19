@@ -45,7 +45,7 @@ const parseStringNull = (object: any, atrName: string): string | null => {
   }
   return object
 }
-const parseStringUndef = (object: any, atrName: string): string | undefined => {
+export const parseStringUndef = (object: any, atrName: string): string | undefined => {
   if (!isUndef(object) && !isString(object)) {
     throw new TypeError(`Incorrect or missing ${atrName}`)
   }

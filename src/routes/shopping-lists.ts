@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express"
 import expressAsyncHandler from "express-async-handler"
 import { createEmptyShoppingList, getShoppingListById, deleteShoppingList, getShoppingLists, getShoppingListItems, addItemToShoppingList, deleteItemFromShoppingList } from "../services/shopping-list-service"
-import { parseString, parseNumber } from "../utils/type-parsers"
+import { parseStringUndef, parseNumber, parseString } from "../utils/type-parsers"
 import { getUserFromToken } from "../services/user-service"
 import { TokenUser } from "../types"
 import { ForbiddenError } from "../utils/errors"
@@ -33,7 +33,8 @@ const validate_and_get_list_id_and_logged_user = async (req: Request): Promise<{
 }
 
 shoppingListRouter.post("/", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const name = parseString(req.body.name, "name")
+  let name = parseStringUndef(req.body.name, "name")
+  name = name ? name : "Nimetön ostoslista"
   const store_id = parseNumber(req.body.store_id, "store_id")
   const loggedUser = await getUserFromToken(req.token)
 
