@@ -23,8 +23,9 @@ const checkUserFromTokenAndUrl = (loggedUser: TokenUser, url: string): void => {
 
 // Gets the shopping_list_id from the request and throws an error
 const validate_and_get_list_id_and_logged_user = async (req: Request): Promise<{ loggedUser: TokenUser; shopping_list_id: string }> => {
-  const shopping_list_id = req.params.id
+  const shopping_list_id = req.params.shopping_list_id
   const loggedUser = await getUserFromToken(req.token)
+  console.log({ loggedUser })
   
   const url = req.baseUrl
   checkUserFromTokenAndUrl(loggedUser, url)
@@ -67,6 +68,8 @@ shoppingListRouter.get("/", expressAsyncHandler(async (req: Request, res: Respon
 shoppingListRouter.get("/:shopping_list_id/items", expressAsyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { loggedUser, shopping_list_id } = await validate_and_get_list_id_and_logged_user(req)
 
+  console.log()
+
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(404).end()
   else if (loggedUser.id === shoppingListInDb.user_id) {
@@ -82,7 +85,7 @@ shoppingListRouter.post("/:shopping_list_id/items", expressAsyncHandler(async (r
   const shoppingListInDb = await getShoppingListById(shopping_list_id)
   if (!shoppingListInDb) res.status(404).end()
   else if (loggedUser.id === shoppingListInDb.user_id) {
-    const product_id = parseString(req.body.id, "id")
+    const product_id = parseNumber(req.body.id, "id")
     const addedProduct = await addItemToShoppingList(shopping_list_id, product_id)
     res.status(201).json(addedProduct)
   }
