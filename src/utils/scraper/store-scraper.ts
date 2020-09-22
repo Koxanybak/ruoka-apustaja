@@ -73,7 +73,7 @@ const scrollStoreList = async (container: puppeteer.ElementHandle<Element> | nul
 
 // main
 void (async () => {
-  const browser = await puppeteer.launch({ headless: false, })
+  const browser = await puppeteer.launch({ headless: true, })
   const page = await browser.newPage()
   await page.setViewport({
     width: 1920,

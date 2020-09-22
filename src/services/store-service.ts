@@ -32,9 +32,6 @@ export const getItemCheckById = async (id: string | undefined): Promise<ItemChec
   const queryText = "SELECT * FROM stores WHERE id = $1"
   id = id ? id : ""
   const res = await pool.query(queryText, [parseInt(id)])
-  if (res.rows.length === 0) {
-    throw new NoContentError("")
-  }
 
   return res.rows.map(row => parseItemCheck(row))[0]
 }

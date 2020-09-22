@@ -1,12 +1,11 @@
-import { pool } from "../utils/config"
+import { pool, redis_client } from "../utils/config"
 import { ProductEntry } from "../types"
 import { SLSearch, ShoppingListResult, } from "../types"
 import { parseProductEntry, } from "../utils/type-parsers"
 import { scrape } from "../utils/scraper/product-scraper"
 import { getItemCheckById } from "./store-service"
 import { ProductScrapeError } from "../utils/errors"
-
-const searching_per_store: { [store_id: number]: boolean; } = {}
+import { promisify } from "util";
 
 // gets all the stores
 export const getProducts = async (name: string | undefined, city: string | undefined): Promise<ProductEntry[]> => {
@@ -27,20 +26,24 @@ export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResu
   // checks if the store has products in db, if not, scrape
   const storeID = parseInt(sl.storeID)
   const { has_products } = await getItemCheckById(sl.storeID)
-  if (searching_per_store[storeID]) throw new ProductScrapeError(
+
+  // redis
+  const get_async = promisify(redis_client.get).bind(redis_client)
+  const set_async = promisify(redis_client.set).bind(redis_client)
+  const searching = await get_async(`searching:${storeID}`)
+  console.log({searching})
+
+  if (searching === "true") throw new ProductScrapeError(
     `Näyttäisi siltä, että kyseisen kaupan tuotteita ei ole vielä tietokannassa.
     Palvelin aloitti tuotteiden etsinnän. Siinä voi kestää 15-80 minuttia riippuen kaupan koosta.`
   )
 
   if (!has_products) {
     // starts the scrape and update searching object
-    searching_per_store[storeID] = true
+    void set_async(`searching:${storeID}`, "true")
     void scrape(storeID)
-      .then(() => {
-        searching_per_store[storeID] = false
-      })
-      .catch(() => {
-        searching_per_store[storeID] = false
+      .finally(() => {
+        void set_async(`searching:${storeID}`, "false")
       })
     throw new ProductScrapeError(
       `Näyttäisi siltä, että kyseisen kaupan tuotteita ei ole vielä tietokannassa.
@@ -69,7 +72,7 @@ export const getProductsForList = async (sl: SLSearch): Promise<ShoppingListResu
   return shoppingList
 }
 
-// gets a single store
+// gets a single product
 export const getProductById = async (id: string | undefined): Promise<ProductEntry | null> => {
   const queryText = "SELECT * FROM products WHERE id = $1"
   id = id ? id : ""
