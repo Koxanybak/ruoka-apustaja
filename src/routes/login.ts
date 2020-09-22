@@ -36,7 +36,7 @@ loginRouter.post("/", expressAsyncHandler(async (req: Request, res: Response) =>
 
     const refresh_token = AES.encrypt(access_token, SECRET).toString()
 
-    res.cookie(REFRESH_COOKIE_NAME, refresh_token, { sameSite: true, maxAge: DEFAULT_TOKEN_EXP_SEC*1000 })
+    res.cookie(REFRESH_COOKIE_NAME, refresh_token, { sameSite: true, maxAge: DEFAULT_TOKEN_EXP_SEC*1000, httpOnly: true })
     res.status(200).json({ ...userForToken, access_token, })
   }
 }))

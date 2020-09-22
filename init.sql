@@ -4824,6 +4824,28 @@ COPY public.products (id, name, store_id, price, price_per_unit, unit, imgsrc, l
 --
 
 COPY public.shopping_list_items (product_id, shopping_list_id) FROM stdin;
+11877	7
+13227	7
+12062	7
+11799	8
+11799	9
+10333	9
+13227	9
+12029	9
+11877	9
+9445	9
+9445	10
+11799	11
+10333	11
+11799	12
+11799	13
+13227	13
+12062	13
+13374	13
+10333	14
+11799	14
+10333	15
+11799	16
 \.
 
 
@@ -4832,6 +4854,16 @@ COPY public.shopping_list_items (product_id, shopping_list_id) FROM stdin;
 --
 
 COPY public.shopping_lists (id, user_id, date_created, name, store_id) FROM stdin;
+7	1	2020-09-21 20:06:30.035156	Nimetön ostoslista	705
+8	1	2020-09-21 20:07:38.347203	Nimetön ostoslista	705
+9	1	2020-09-21 20:08:08.735413	Nimetön ostoslista	705
+10	1	2020-09-21 20:08:41.693724	Nimetön ostoslista	705
+11	1	2020-09-21 20:17:48.437347	Nimetön ostoslista	705
+12	1	2020-09-21 20:20:11.001408	Nimetön ostoslista	705
+13	1	2020-09-21 20:24:29.804334	Nimetön ostoslista	705
+14	1	2020-09-21 20:39:40.021893	Nimetön ostoslista	705
+15	1	2020-09-21 20:40:38.175249	Nimetön ostoslista	705
+16	1	2020-09-21 20:41:17.408836	Nimetön ostoslista	705
 \.
 
 
@@ -6012,6 +6044,7 @@ COPY public.stores (id, name, city, has_products, searching) FROM stdin;
 --
 
 COPY public.users (id, username, pwhash, date_created) FROM stdin;
+1	testitesti	$2b$10$9KZ0VLqwcKSh124k0HC9/eAm84Dk14ktfB2NcldzzXqvfeaj/RALK	2020-09-18 11:32:54.687686
 \.
 
 
@@ -6026,7 +6059,7 @@ SELECT pg_catalog.setval('public.products_id_seq', 14029, true);
 -- Name: shopping_lists_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.shopping_lists_id_seq', 1, false);
+SELECT pg_catalog.setval('public.shopping_lists_id_seq', 16, true);
 
 
 --
@@ -6040,7 +6073,7 @@ SELECT pg_catalog.setval('public.stores_id_seq', 5103, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 
 
 --
@@ -6057,6 +6090,14 @@ ALTER TABLE ONLY public.products
 
 ALTER TABLE ONLY public.shopping_list_items
     ADD CONSTRAINT shopping_list_items_pkey PRIMARY KEY (product_id, shopping_list_id);
+
+
+--
+-- Name: shopping_list_items shopping_list_items_shopping_list_id_product_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shopping_list_items
+    ADD CONSTRAINT shopping_list_items_shopping_list_id_product_id_key UNIQUE (shopping_list_id, product_id);
 
 
 --

@@ -1,5 +1,4 @@
 import express from "express"
-/* import http from "http" */
 import http = require("http")
 import storeRouter from "./routes/stores"
 import { errorHandler, unknownEndpoint, tokenExtractor } from "./utils/middleware"
@@ -9,7 +8,6 @@ import cors from "cors"
 import productRouter from "./routes/products"
 import shoppingListRouter from "./routes/shopping-lists"
 import cookie_parser from "cookie-parser"
-/* require("express-async-errors") */
 
 const PORT = 3001
 

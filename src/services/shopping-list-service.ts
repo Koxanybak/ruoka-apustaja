@@ -1,7 +1,7 @@
 import { pool } from "../utils/config"
 import { ShoppingList, ProductEntry } from "../types"
 import { getProductById } from "./product-service"
-import { BadRequestError } from "../utils/errors"
+import { BadRequestError, DatabaseError } from "../utils/errors"
 
 
 // creates an empty shoppinglist and returns its id
@@ -22,16 +22,22 @@ export const deleteShoppingList = async (shopping_list_id: number | string) => {
 
 // adds an items to the shopping list
 export const addItemToShoppingList = async (shopping_list_id: string | number, product_id: string | number): Promise<ProductEntry> => {
-  console.log({ shopping_list_id, product_id, })
   shopping_list_id = parseInt(shopping_list_id.toString())
   product_id = parseInt(product_id.toString())
   const shopping_list = await getShoppingListById(shopping_list_id)
   const product = await getProductById(product_id.toString())
+
   if (!product) throw new BadRequestError("The product does not exist")
   if (shopping_list?.store_id !== product.storeID) throw new BadRequestError("The product must be from the store of the shopping list")
-  const queryText = "INSERT INTO shopping_list_items(shopping_list_id, product_id) VALUES ($1, $2) RETURNING product_id"
-  const { rows } = await pool.query(queryText, [shopping_list_id, product_id])
-  return rows[0]
+
+  try {
+    const queryText = `INSERT INTO shopping_list_items(shopping_list_id, product_id) VALUES ($1, $2) RETURNING product_id`
+    await pool.query(queryText, [shopping_list_id, product_id])
+  } catch (e) {
+    throw new DatabaseError("Kyseinen tuote on jo lisätty ostoslistalle.")
+  }
+  
+  return product
 }
 
 // deletes an items from the shopping list
@@ -52,9 +58,8 @@ export const getShoppingLists = async (user_id: number | string): Promise<Omit<S
 
 // gets contents of the shopping list
 export const getShoppingListItems = async (id: number | string): Promise<Omit<ProductEntry, "storeID">[]> => {
-  console.log({ id })
   id = parseInt(id.toString())
-  const queryText = "SELECT p.id, p.name, p.price, p.price_per_unit, p.unit, p.imgsrc, p.link FROM shopping_list_items s, products p WHERE s.product_id = p.id AND p.id = $1"
+  const queryText = "SELECT p.id, p.name, p.price, p.price_per_unit, p.unit, p.imgsrc, p.link FROM shopping_list_items s, products p, shopping_lists sl WHERE s.product_id = p.id AND sl.id = $1 AND sl.id = s.shopping_list_id"
   const { rows } = await pool.query(queryText, [id])
   return rows
 }

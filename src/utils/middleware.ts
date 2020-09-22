@@ -40,6 +40,9 @@ export const errorHandler = (err: Error, req: express.Request, res: express.Resp
   else if (err.name === "TokenExpiredError") {
     res.status(401).send({ error: "Istuntosi on päättynyt. Kirjaudu sisään uudelleen." })
   }
+  else if (err.name === "DatabaseError") {
+    res.status(400).send({ error: err.message })
+  }
   else {
     next(err)
   }
