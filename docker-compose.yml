@@ -3,8 +3,6 @@ version: "3.5"
 services: 
     api:
         build: .
-        ports:
-            - 3001:3001
         container_name: ruoka-api
         image: koxanybak/ruoka-api
     db:
@@ -12,7 +10,7 @@ services:
         volumes:
             - ./init.sql:/docker-entrypoint-initdb.d/init.sql
         container_name: ruoka-db
-        environment: 
+        environment:
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=ruoka_apustaja
     client:
@@ -21,3 +19,14 @@ services:
     redis:
         image: redis
         container_name: ruoka-redis
+    proxy:
+        image: nginx
+        container_name: ruoka-proxy
+        ports:
+            - 80:80
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        depends_on: 
+            - api
+            - client
+        
