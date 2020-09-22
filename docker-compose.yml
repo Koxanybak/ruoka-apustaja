@@ -15,3 +15,9 @@ services:
         environment: 
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=ruoka_apustaja
+    client:
+        image: koxanybak/ruoka-client
+        container_name: ruoka-client
+    redis:
+        image: redis
+        container_name: ruoka-redis
